@@ -48,17 +48,17 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public List<CustomerDetails> listClients() {
+    public List<CustomerDetails> listCustomers() {
         return clientMap.values().stream().map(CustomerDetails::new).toList();
     }
 
     @Override
-    public CustomerDetails getClientById(UUID id) {
+    public CustomerDetails getCustomerDetaisById(UUID id) {
         return new CustomerDetails(clientMap.get(id));
     }
 
     @Override
-    public void saveNewClient(CustomerCreationRequest request) {
+    public CustomerDetails saveNewClient(CustomerCreationRequest request) {
         Customer newCustomer = Customer.builder()
                 .id(UUID.randomUUID())
                 .version(request.version())
@@ -69,6 +69,6 @@ public class CustomerServiceImpl implements CustomerService {
 
         clientMap.put(newCustomer.getId(), newCustomer);
 
-        new CustomerDetails(newCustomer);
+        return new CustomerDetails(newCustomer);
     }
 }

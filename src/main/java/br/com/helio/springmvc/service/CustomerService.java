@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.UUID;
 
 public interface CustomerService {
-    List<CustomerDetails> listClients();
+    List<CustomerDetails> listCustomers();
 
-    CustomerDetails getClientById(UUID id);
+    CustomerDetails getCustomerDetaisById(UUID id);
 
-    void saveNewClient(CustomerCreationRequest request);
+    CustomerDetails saveNewClient(CustomerCreationRequest request);
 }

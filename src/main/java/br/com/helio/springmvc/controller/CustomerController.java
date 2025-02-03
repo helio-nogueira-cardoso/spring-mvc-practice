@@ -5,6 +5,7 @@ import br.com.helio.springmvc.dto.CustomerDetails;
 import br.com.helio.springmvc.service.CustomerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +15,7 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/clients")
+@RequestMapping("/api/v1/customers")
 @Slf4j
 public class CustomerController {
     private final CustomerService customerService;
@@ -22,18 +23,21 @@ public class CustomerController {
     @PostMapping
     public ResponseEntity<HttpStatus> handlePost(@RequestBody CustomerCreationRequest request) {
         log.debug("Creating new client");
-        customerService.saveNewClient(request);
+        CustomerDetails customerDetails = customerService.saveNewClient(request);
 
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Location","/api/v1/customers/" + customerDetails.id().toString());
+
+        return new ResponseEntity<>(headers, HttpStatus.CREATED);
     }
 
     @GetMapping
-    public List<CustomerDetails> listClients() {
-        return customerService.listClients();
+    public List<CustomerDetails> listCustomers() {
+        return customerService.listCustomers();
     }
 
     @GetMapping("{clientId}")
-    public CustomerDetails getClientById(@PathVariable("clientId") UUID clientID) {
-        return customerService.getClientById(clientID);
+    public CustomerDetails getCustomerById(@PathVariable("clientId") UUID clientID) {
+        return customerService.getCustomerDetaisById(clientID);
     }
 }
