@@ -1,7 +1,7 @@
 package br.com.helio.springmvc.service;
 
-import br.com.helio.springmvc.dto.CustomerCreationRequest;
-import br.com.helio.springmvc.dto.CustomerDetails;
+import br.com.helio.springmvc.dto.customer.CustomerCreationRequest;
+import br.com.helio.springmvc.dto.customer.CustomerDetails;
 import br.com.helio.springmvc.model.Customer;
 import org.springframework.stereotype.Service;
 
@@ -61,7 +61,7 @@ public class CustomerServiceImpl implements CustomerService {
     public CustomerDetails saveNewClient(CustomerCreationRequest request) {
         Customer newCustomer = Customer.builder()
                 .id(UUID.randomUUID())
-                .version(request.version())
+                .version(1)
                 .name(request.name())
                 .createdDate(LocalDateTime.now())
                 .lastModifiedDate(LocalDateTime.now())

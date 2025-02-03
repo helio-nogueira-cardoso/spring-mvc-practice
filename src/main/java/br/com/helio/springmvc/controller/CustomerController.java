@@ -1,7 +1,7 @@
 package br.com.helio.springmvc.controller;
 
-import br.com.helio.springmvc.dto.CustomerCreationRequest;
-import br.com.helio.springmvc.dto.CustomerDetails;
+import br.com.helio.springmvc.dto.customer.CustomerCreationRequest;
+import br.com.helio.springmvc.dto.customer.CustomerDetails;
 import br.com.helio.springmvc.service.CustomerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

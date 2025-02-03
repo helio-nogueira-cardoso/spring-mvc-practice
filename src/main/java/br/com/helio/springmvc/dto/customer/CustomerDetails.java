@@ -1,4 +1,4 @@
-package br.com.helio.springmvc.dto;
+package br.com.helio.springmvc.dto.customer;
 
 import br.com.helio.springmvc.model.Customer;
 

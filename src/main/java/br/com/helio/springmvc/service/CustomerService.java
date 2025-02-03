@@ -1,7 +1,7 @@
 package br.com.helio.springmvc.service;
 
-import br.com.helio.springmvc.dto.CustomerCreationRequest;
-import br.com.helio.springmvc.dto.CustomerDetails;
+import br.com.helio.springmvc.dto.customer.CustomerCreationRequest;
+import br.com.helio.springmvc.dto.customer.CustomerDetails;
 
 import java.util.List;
 import java.util.UUID;
