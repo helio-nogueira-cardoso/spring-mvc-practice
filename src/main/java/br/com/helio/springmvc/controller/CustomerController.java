@@ -2,6 +2,7 @@ package br.com.helio.springmvc.controller;
 
 import br.com.helio.springmvc.dto.customer.CustomerCreationRequest;
 import br.com.helio.springmvc.dto.customer.CustomerDetails;
+import br.com.helio.springmvc.dto.customer.CustomerUpdateRequest;
 import br.com.helio.springmvc.service.CustomerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,14 +21,27 @@ import java.util.UUID;
 public class CustomerController {
     private final CustomerService customerService;
 
+    private HttpHeaders buildLocationHeader(UUID customerId) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Location","/api/v1/customers/" + customerId.toString());
+        return headers;
+    }
+
+    @PutMapping("{customerId}")
+    public ResponseEntity<HttpStatus> updateById(
+            @PathVariable("customerId") UUID customerId,
+            @RequestBody CustomerUpdateRequest request
+    ) {
+        CustomerDetails customerDetails = customerService.updateCustomerById(customerId, request);
+        HttpHeaders headers = buildLocationHeader(customerDetails.id());
+        return new ResponseEntity<>(headers, HttpStatus.OK);
+    }
+
     @PostMapping
     public ResponseEntity<HttpStatus> handlePost(@RequestBody CustomerCreationRequest request) {
         log.debug("Creating new client");
-        CustomerDetails customerDetails = customerService.saveNewClient(request);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Location","/api/v1/customers/" + customerDetails.id().toString());
-
+        CustomerDetails customerDetails = customerService.saveNewCustomer(request);
+        HttpHeaders headers = buildLocationHeader(customerDetails.id());
         return new ResponseEntity<>(headers, HttpStatus.CREATED);
     }
 
