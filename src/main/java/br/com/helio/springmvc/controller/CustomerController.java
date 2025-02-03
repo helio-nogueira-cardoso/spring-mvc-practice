@@ -27,14 +27,19 @@ public class CustomerController {
         return headers;
     }
 
+    @DeleteMapping("{customerId}")
+    public ResponseEntity<HttpStatus> deleteById(@PathVariable("customerId") UUID customerId) {
+        customerService.deleteCustomerById(customerId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
     @PutMapping("{customerId}")
     public ResponseEntity<HttpStatus> updateById(
             @PathVariable("customerId") UUID customerId,
             @RequestBody CustomerUpdateRequest request
     ) {
-        CustomerDetails customerDetails = customerService.updateCustomerById(customerId, request);
-        HttpHeaders headers = buildLocationHeader(customerDetails.id());
-        return new ResponseEntity<>(headers, HttpStatus.OK);
+        customerService.updateCustomerById(customerId, request);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PostMapping
