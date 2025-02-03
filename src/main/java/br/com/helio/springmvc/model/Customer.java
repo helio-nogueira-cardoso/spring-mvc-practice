@@ -8,9 +8,9 @@ import java.util.UUID;
 
 @Data
 @Builder
-public class Client {
+public class Customer {
     private UUID id;
-    private String customerName;
+    private String name;
     private Integer version;
     private LocalDateTime createdDate;
     private LocalDateTime lastModifiedDate;
