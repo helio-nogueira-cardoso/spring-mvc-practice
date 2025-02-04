@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -35,6 +36,9 @@ class CustomerControllerTest {
 
     @MockitoBean
     CustomerService customerService;
+
+    @Captor
+    ArgumentCaptor<CustomerUpdateRequest> customerUpdateRequestArgumentCaptor;
 
     private final List<CustomerDetails> customersList = new ArrayList<>(List.of(
         new CustomerDetails(
@@ -123,12 +127,22 @@ class CustomerControllerTest {
         )
                 .andExpect(status().isNoContent());
 
-        ArgumentCaptor<CustomerUpdateRequest> captor = ArgumentCaptor.forClass(CustomerUpdateRequest.class);
+        verify(customerService, times(1))
+                .updateCustomerById(eq(testCustomer.id()), customerUpdateRequestArgumentCaptor.capture());
+
+        CustomerUpdateRequest capturedRequest = customerUpdateRequestArgumentCaptor.getValue();
+        Assertions.assertEquals(testCustomer.name(), capturedRequest.name());
+    }
+
+    @Test
+    void testDeleteCustomer() throws Exception {
+        CustomerDetails testCustomer = customersList.getFirst();
+        mockMvc.perform(delete("/api/v1/customers/" + testCustomer.id())
+                        .accept(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isNoContent());
 
         verify(customerService, times(1))
-                .updateCustomerById(eq(testCustomer.id()), captor.capture());
-
-        CustomerUpdateRequest capturedRequest = captor.getValue();
-        Assertions.assertEquals(testCustomer.name(), capturedRequest.name());
+                .deleteCustomerById(eq(testCustomer.id()));
     }
 }
