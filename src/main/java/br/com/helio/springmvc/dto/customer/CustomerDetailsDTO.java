@@ -1,6 +1,6 @@
 package br.com.helio.springmvc.dto.customer;
 
-import br.com.helio.springmvc.model.Customer;
+import br.com.helio.springmvc.models.Customer;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

@@ -1,10 +1,10 @@
-package br.com.helio.springmvc.controller;
+package br.com.helio.springmvc.controllers;
 
 import br.com.helio.springmvc.dto.customer.CustomerCreationRequestDTO;
 import br.com.helio.springmvc.dto.customer.CustomerDetailsDTO;
 import br.com.helio.springmvc.dto.customer.CustomerUpdateRequestDTO;
-import br.com.helio.springmvc.exception.NotFoundException;
-import br.com.helio.springmvc.service.CustomerService;
+import br.com.helio.springmvc.exceptions.NotFoundException;
+import br.com.helio.springmvc.services.CustomerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;

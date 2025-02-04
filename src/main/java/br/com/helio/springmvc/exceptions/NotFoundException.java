@@ -1,4 +1,4 @@
-package br.com.helio.springmvc.exception;
+package br.com.helio.springmvc.exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

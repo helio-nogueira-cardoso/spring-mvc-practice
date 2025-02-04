@@ -1,4 +1,4 @@
-package br.com.helio.springmvc.model;
+package br.com.helio.springmvc.models;
 
 import lombok.Builder;
 import lombok.Data;

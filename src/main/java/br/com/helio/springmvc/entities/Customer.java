@@ -1,4 +1,4 @@
-package br.com.helio.springmvc.entity;
+package br.com.helio.springmvc.entities;
 
 import jakarta.persistence.*;
 import lombok.*;

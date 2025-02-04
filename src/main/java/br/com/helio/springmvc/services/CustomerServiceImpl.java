@@ -1,9 +1,9 @@
-package br.com.helio.springmvc.service;
+package br.com.helio.springmvc.services;
 
 import br.com.helio.springmvc.dto.customer.CustomerCreationRequestDTO;
 import br.com.helio.springmvc.dto.customer.CustomerDetailsDTO;
 import br.com.helio.springmvc.dto.customer.CustomerUpdateRequestDTO;
-import br.com.helio.springmvc.model.Customer;
+import br.com.helio.springmvc.models.Customer;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;

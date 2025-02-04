@@ -1,9 +1,9 @@
-package br.com.helio.springmvc.controller;
+package br.com.helio.springmvc.controllers;
 
 import br.com.helio.springmvc.dto.customer.CustomerCreationRequestDTO;
 import br.com.helio.springmvc.dto.customer.CustomerDetailsDTO;
 import br.com.helio.springmvc.dto.customer.CustomerUpdateRequestDTO;
-import br.com.helio.springmvc.service.CustomerService;
+import br.com.helio.springmvc.services.CustomerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;

@@ -1,6 +1,6 @@
-package br.com.helio.springmvc.repository;
+package br.com.helio.springmvc.repositories;
 
-import br.com.helio.springmvc.entity.Customer;
+import br.com.helio.springmvc.entities.Customer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
