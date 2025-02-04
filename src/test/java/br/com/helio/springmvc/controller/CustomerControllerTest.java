@@ -73,7 +73,7 @@ class CustomerControllerTest {
 
         mockMvc
             .perform(
-                get("/api/v1/customers/" + testCustomerDetails.id())
+                get(CustomerController.CUSTOMER_PATH_ID, testCustomerDetails.id())
                     .accept(MediaType.APPLICATION_JSON)
             )
             .andExpect(status().isOk())
@@ -89,8 +89,8 @@ class CustomerControllerTest {
 
         mockMvc
             .perform(
-                get("/api/v1/customers")
-                        .accept(MediaType.APPLICATION_JSON)
+                get(CustomerController.CUSTOMER_PATH)
+                    .accept(MediaType.APPLICATION_JSON)
             )
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -106,10 +106,10 @@ class CustomerControllerTest {
                 .thenReturn(testCustomer);
 
         mockMvc.perform(
-                post("/api/v1/customers")
-                    .accept(MediaType.APPLICATION_JSON)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(request))
+            post(CustomerController.CUSTOMER_PATH)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
         )
             .andExpect(status().isCreated())
             .andExpect(header().exists("Location"))
@@ -120,15 +120,16 @@ class CustomerControllerTest {
     void testUpdateCustomer() throws Exception {
         CustomerDetails testCustomer = customersList.getFirst();
         CustomerUpdateRequest customerUpdateRequest = new CustomerUpdateRequest(testCustomer.name());
-        mockMvc.perform(put("/api/v1/customers/" + testCustomer.id())
+        mockMvc.perform(
+            put(CustomerController.CUSTOMER_PATH_ID, testCustomer.id())
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(customerUpdateRequest))
         )
-                .andExpect(status().isNoContent());
+            .andExpect(status().isNoContent());
 
         verify(customerService, times(1))
-                .updateCustomerById(eq(testCustomer.id()), customerUpdateRequestArgumentCaptor.capture());
+            .updateCustomerById(eq(testCustomer.id()), customerUpdateRequestArgumentCaptor.capture());
 
         CustomerUpdateRequest capturedRequest = customerUpdateRequestArgumentCaptor.getValue();
         assertThat(capturedRequest.name()).isEqualTo(testCustomer.name());
@@ -137,12 +138,13 @@ class CustomerControllerTest {
     @Test
     void testDeleteCustomer() throws Exception {
         CustomerDetails testCustomer = customersList.getFirst();
-        mockMvc.perform(delete("/api/v1/customers/" + testCustomer.id())
-                        .accept(MediaType.APPLICATION_JSON)
-                )
-                .andExpect(status().isNoContent());
+        mockMvc.perform(
+            delete(CustomerController.CUSTOMER_PATH_ID, testCustomer.id())
+                .accept(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(status().isNoContent());
 
         verify(customerService, times(1))
-                .deleteCustomerById(eq(testCustomer.id()));
+            .deleteCustomerById(eq(testCustomer.id()));
     }
 }
