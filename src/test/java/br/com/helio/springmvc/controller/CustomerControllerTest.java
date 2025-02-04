@@ -10,6 +10,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.Mockito.when;
@@ -25,15 +27,33 @@ class CustomerControllerTest {
     @MockitoBean
     CustomerService customerService;
 
+    private final List<CustomerDetails> customersList = new ArrayList<>(List.of(
+        new CustomerDetails(
+                UUID.randomUUID(),
+                "Test Customer 1",
+                1,
+                LocalDateTime.now(),
+                LocalDateTime.now()
+        ),
+        new CustomerDetails(
+                UUID.randomUUID(),
+                "Test Customer 2",
+                1,
+                LocalDateTime.now(),
+                LocalDateTime.now()
+        ),
+        new CustomerDetails(
+                UUID.randomUUID(),
+                "Test Customer 3",
+                1,
+                LocalDateTime.now(),
+                LocalDateTime.now()
+        )
+    ));
+
     @Test
     void getCustomerById() throws Exception {
-        CustomerDetails testCustomerDetails = new CustomerDetails(
-            UUID.randomUUID(),
-            "Test Customer",
-            1,
-            LocalDateTime.now(),
-            LocalDateTime.now()
-        );
+        CustomerDetails testCustomerDetails = customersList.getFirst();
 
         when(customerService.getCustomerDetaisById(testCustomerDetails.id()))
                 .thenReturn(testCustomerDetails);
@@ -47,5 +67,20 @@ class CustomerControllerTest {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.id",  is(testCustomerDetails.id().toString())))
             .andExpect(jsonPath("$.name", is(testCustomerDetails.name())));
+    }
+
+    @Test
+    void listCustomers() throws Exception {
+        when(customerService.listCustomers())
+                .thenReturn(customersList);
+
+        mockMvc
+            .perform(
+                get("/api/v1/customers")
+                        .accept(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.length()", is(customersList.size())));
     }
 }
