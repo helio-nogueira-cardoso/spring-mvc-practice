@@ -1,8 +1,9 @@
 package br.com.helio.springmvc.controller;
 
-import br.com.helio.springmvc.dto.customer.CustomerCreationRequest;
-import br.com.helio.springmvc.dto.customer.CustomerDetails;
-import br.com.helio.springmvc.dto.customer.CustomerUpdateRequest;
+import br.com.helio.springmvc.dto.customer.CustomerCreationRequestDTO;
+import br.com.helio.springmvc.dto.customer.CustomerDetailsDTO;
+import br.com.helio.springmvc.dto.customer.CustomerUpdateRequestDTO;
+import br.com.helio.springmvc.exception.NotFoundException;
 import br.com.helio.springmvc.service.CustomerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +40,7 @@ public class CustomerController {
     @PatchMapping(CUSTOMER_PATH_ID)
     public ResponseEntity<HttpStatus> patchCustomerById(
             @PathVariable(CUSTOMER_ID_PATH_VARIABLE_NAME) UUID customerId,
-            @RequestBody CustomerUpdateRequest request
+            @RequestBody CustomerUpdateRequestDTO request
     ) {
         customerService.patchCustomerById(customerId, request);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -53,27 +54,27 @@ public class CustomerController {
     @PutMapping(CUSTOMER_PATH_ID)
     public ResponseEntity<HttpStatus> updateById(
             @PathVariable(CUSTOMER_ID_PATH_VARIABLE_NAME) UUID customerId,
-            @RequestBody CustomerUpdateRequest request
+            @RequestBody CustomerUpdateRequestDTO request
     ) {
         customerService.updateCustomerById(customerId, request);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PostMapping(CUSTOMER_PATH)
-    public ResponseEntity<HttpStatus> handlePost(@RequestBody CustomerCreationRequest request) {
+    public ResponseEntity<HttpStatus> handlePost(@RequestBody CustomerCreationRequestDTO request) {
         log.debug("Creating new client");
-        CustomerDetails customerDetails = customerService.saveNewCustomer(request);
-        HttpHeaders headers = buildLocationHeader(customerDetails.id());
+        CustomerDetailsDTO customerDetailsDTO = customerService.saveNewCustomer(request);
+        HttpHeaders headers = buildLocationHeader(customerDetailsDTO.id());
         return new ResponseEntity<>(headers, HttpStatus.CREATED);
     }
 
     @GetMapping(CUSTOMER_PATH)
-    public List<CustomerDetails> listCustomers() {
+    public List<CustomerDetailsDTO> listCustomers() {
         return customerService.listCustomers();
     }
 
     @GetMapping(CUSTOMER_PATH_ID)
-    public CustomerDetails getCustomerById(@PathVariable(CUSTOMER_ID_PATH_VARIABLE_NAME) UUID customerId) {
-        return customerService.getCustomerDetaisById(customerId);
+    public CustomerDetailsDTO getCustomerById(@PathVariable(CUSTOMER_ID_PATH_VARIABLE_NAME) UUID customerId) {
+        return customerService.getCustomerDetaisById(customerId).orElseThrow(NotFoundException::new);
     }
 }

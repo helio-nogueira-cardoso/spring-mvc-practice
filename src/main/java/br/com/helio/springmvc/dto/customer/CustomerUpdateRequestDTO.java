@@ -1,6 +1,6 @@
 package br.com.helio.springmvc.dto.customer;
 
-public record CustomerUpdateRequest(
+public record CustomerUpdateRequestDTO(
         String name
 ) {
 }

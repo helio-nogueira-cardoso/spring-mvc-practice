@@ -5,14 +5,14 @@ import br.com.helio.springmvc.model.Customer;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record CustomerDetails(
+public record CustomerDetailsDTO(
         UUID id,
         String name,
         Integer version,
         LocalDateTime createdDate,
         LocalDateTime lastModifiedDate
 ) {
-    public CustomerDetails(Customer customer) {
+    public CustomerDetailsDTO(Customer customer) {
         this(
                 customer.getId(),
                 customer.getName(),

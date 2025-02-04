@@ -1,6 +1,6 @@
 package br.com.helio.springmvc.dto.customer;
 
-public record CustomerCreationRequest(
+public record CustomerCreationRequestDTO(
         String name
 ) {
 }

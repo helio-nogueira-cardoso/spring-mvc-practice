@@ -1,9 +1,8 @@
 package br.com.helio.springmvc.controller;
 
-import br.com.helio.springmvc.dto.customer.CustomerCreationRequest;
-import br.com.helio.springmvc.dto.customer.CustomerDetails;
-import br.com.helio.springmvc.dto.customer.CustomerUpdateRequest;
-import br.com.helio.springmvc.exception.NotFoundException;
+import br.com.helio.springmvc.dto.customer.CustomerCreationRequestDTO;
+import br.com.helio.springmvc.dto.customer.CustomerDetailsDTO;
+import br.com.helio.springmvc.dto.customer.CustomerUpdateRequestDTO;
 import br.com.helio.springmvc.service.CustomerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -18,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,24 +39,24 @@ class CustomerControllerTest {
     CustomerService customerService;
 
     @Captor
-    ArgumentCaptor<CustomerUpdateRequest> customerUpdateRequestArgumentCaptor;
+    ArgumentCaptor<CustomerUpdateRequestDTO> customerUpdateRequestArgumentCaptor;
 
-    private final List<CustomerDetails> customersList = new ArrayList<>(List.of(
-        new CustomerDetails(
+    private final List<CustomerDetailsDTO> customersList = new ArrayList<>(List.of(
+        new CustomerDetailsDTO(
                 UUID.randomUUID(),
                 "Test Customer 1",
                 1,
                 LocalDateTime.now(),
                 LocalDateTime.now()
         ),
-        new CustomerDetails(
+        new CustomerDetailsDTO(
                 UUID.randomUUID(),
                 "Test Customer 2",
                 1,
                 LocalDateTime.now(),
                 LocalDateTime.now()
         ),
-        new CustomerDetails(
+        new CustomerDetailsDTO(
                 UUID.randomUUID(),
                 "Test Customer 3",
                 1,
@@ -67,26 +67,26 @@ class CustomerControllerTest {
 
     @Test
     void getCustomerById() throws Exception {
-        CustomerDetails testCustomerDetails = customersList.getFirst();
+        CustomerDetailsDTO testCustomerDetailsDTO = customersList.getFirst();
 
-        when(customerService.getCustomerDetaisById(testCustomerDetails.id()))
-                .thenReturn(testCustomerDetails);
+        when(customerService.getCustomerDetaisById(testCustomerDetailsDTO.id()))
+                .thenReturn(Optional.of(testCustomerDetailsDTO));
 
         mockMvc
             .perform(
-                get(CustomerController.CUSTOMER_PATH_ID, testCustomerDetails.id())
+                get(CustomerController.CUSTOMER_PATH_ID, testCustomerDetailsDTO.id())
                     .accept(MediaType.APPLICATION_JSON)
             )
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.id",  is(testCustomerDetails.id().toString())))
-            .andExpect(jsonPath("$.name", is(testCustomerDetails.name())));
+            .andExpect(jsonPath("$.id",  is(testCustomerDetailsDTO.id().toString())))
+            .andExpect(jsonPath("$.name", is(testCustomerDetailsDTO.name())));
     }
 
     @Test
     void getCustomerByIdNotFound() throws Exception {
         when(customerService.getCustomerDetaisById(any(UUID.class)))
-                .thenThrow(NotFoundException.class);
+                .thenReturn(Optional.empty());
 
         mockMvc
             .perform(
@@ -113,10 +113,10 @@ class CustomerControllerTest {
 
     @Test
     void handlePost() throws Exception {
-        CustomerDetails testCustomer = customersList.getFirst();
-        CustomerCreationRequest request = new CustomerCreationRequest(testCustomer.name());
+        CustomerDetailsDTO testCustomer = customersList.getFirst();
+        CustomerCreationRequestDTO request = new CustomerCreationRequestDTO(testCustomer.name());
 
-        when(customerService.saveNewCustomer(any(CustomerCreationRequest.class)))
+        when(customerService.saveNewCustomer(any(CustomerCreationRequestDTO.class)))
                 .thenReturn(testCustomer);
 
         mockMvc.perform(
@@ -132,26 +132,26 @@ class CustomerControllerTest {
 
     @Test
     void testUpdateCustomer() throws Exception {
-        CustomerDetails testCustomer = customersList.getFirst();
-        CustomerUpdateRequest customerUpdateRequest = new CustomerUpdateRequest(testCustomer.name());
+        CustomerDetailsDTO testCustomer = customersList.getFirst();
+        CustomerUpdateRequestDTO customerUpdateRequestDTO = new CustomerUpdateRequestDTO(testCustomer.name());
         mockMvc.perform(
             put(CustomerController.CUSTOMER_PATH_ID, testCustomer.id())
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(customerUpdateRequest))
+                .content(objectMapper.writeValueAsString(customerUpdateRequestDTO))
         )
             .andExpect(status().isNoContent());
 
         verify(customerService, times(1))
             .updateCustomerById(eq(testCustomer.id()), customerUpdateRequestArgumentCaptor.capture());
 
-        CustomerUpdateRequest capturedRequest = customerUpdateRequestArgumentCaptor.getValue();
+        CustomerUpdateRequestDTO capturedRequest = customerUpdateRequestArgumentCaptor.getValue();
         assertThat(capturedRequest.name()).isEqualTo(testCustomer.name());
     }
 
     @Test
     void testDeleteCustomer() throws Exception {
-        CustomerDetails testCustomer = customersList.getFirst();
+        CustomerDetailsDTO testCustomer = customersList.getFirst();
         mockMvc.perform(
             delete(CustomerController.CUSTOMER_PATH_ID, testCustomer.id())
                 .accept(MediaType.APPLICATION_JSON)

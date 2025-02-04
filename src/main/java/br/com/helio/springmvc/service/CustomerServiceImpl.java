@@ -1,16 +1,13 @@
 package br.com.helio.springmvc.service;
 
-import br.com.helio.springmvc.dto.customer.CustomerCreationRequest;
-import br.com.helio.springmvc.dto.customer.CustomerDetails;
-import br.com.helio.springmvc.dto.customer.CustomerUpdateRequest;
+import br.com.helio.springmvc.dto.customer.CustomerCreationRequestDTO;
+import br.com.helio.springmvc.dto.customer.CustomerDetailsDTO;
+import br.com.helio.springmvc.dto.customer.CustomerUpdateRequestDTO;
 import br.com.helio.springmvc.model.Customer;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class CustomerServiceImpl implements CustomerService {
@@ -49,17 +46,17 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public List<CustomerDetails> listCustomers() {
-        return customerMap.values().stream().map(CustomerDetails::new).toList();
+    public List<CustomerDetailsDTO> listCustomers() {
+        return customerMap.values().stream().map(CustomerDetailsDTO::new).toList();
     }
 
     @Override
-    public CustomerDetails getCustomerDetaisById(UUID id) {
-        return new CustomerDetails(customerMap.get(id));
+    public Optional<CustomerDetailsDTO> getCustomerDetaisById(UUID id) {
+        return Optional.of(new CustomerDetailsDTO(customerMap.get(id)));
     }
 
     @Override
-    public CustomerDetails saveNewCustomer(CustomerCreationRequest request) {
+    public CustomerDetailsDTO saveNewCustomer(CustomerCreationRequestDTO request) {
         Customer newCustomer = Customer.builder()
                 .id(UUID.randomUUID())
                 .version(1)
@@ -70,15 +67,15 @@ public class CustomerServiceImpl implements CustomerService {
 
         customerMap.put(newCustomer.getId(), newCustomer);
 
-        return new CustomerDetails(newCustomer);
+        return new CustomerDetailsDTO(newCustomer);
     }
 
     @Override
-    public void updateCustomerById(UUID customerId, CustomerUpdateRequest request) {
+    public void updateCustomerById(UUID customerId, CustomerUpdateRequestDTO request) {
         Customer existingCustomer = customerMap.get(customerId);
 
         if (existingCustomer == null) {
-            this.saveNewCustomer(new CustomerCreationRequest(request.name()));
+            this.saveNewCustomer(new CustomerCreationRequestDTO(request.name()));
             return;
         }
 
@@ -94,7 +91,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void patchCustomerById(UUID customerId, CustomerUpdateRequest request) {
+    public void patchCustomerById(UUID customerId, CustomerUpdateRequestDTO request) {
         Customer existingCustomer = customerMap.get(customerId);
 
         if (existingCustomer != null && request.name() != null) {

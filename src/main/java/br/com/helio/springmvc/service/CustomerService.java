@@ -1,22 +1,23 @@
 package br.com.helio.springmvc.service;
 
-import br.com.helio.springmvc.dto.customer.CustomerCreationRequest;
-import br.com.helio.springmvc.dto.customer.CustomerDetails;
-import br.com.helio.springmvc.dto.customer.CustomerUpdateRequest;
+import br.com.helio.springmvc.dto.customer.CustomerCreationRequestDTO;
+import br.com.helio.springmvc.dto.customer.CustomerDetailsDTO;
+import br.com.helio.springmvc.dto.customer.CustomerUpdateRequestDTO;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface CustomerService {
-    List<CustomerDetails> listCustomers();
+    List<CustomerDetailsDTO> listCustomers();
 
-    CustomerDetails getCustomerDetaisById(UUID id);
+    Optional<CustomerDetailsDTO> getCustomerDetaisById(UUID id);
 
-    CustomerDetails saveNewCustomer(CustomerCreationRequest request);
+    CustomerDetailsDTO saveNewCustomer(CustomerCreationRequestDTO request);
 
-    void updateCustomerById(UUID customerId, CustomerUpdateRequest request);
+    void updateCustomerById(UUID customerId, CustomerUpdateRequestDTO request);
 
     void deleteCustomerById(UUID customerId);
 
-    void patchCustomerById(UUID customerId, CustomerUpdateRequest request);
+    void patchCustomerById(UUID customerId, CustomerUpdateRequestDTO request);
 }
