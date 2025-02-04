@@ -2,9 +2,12 @@ package br.com.helio.springmvc.controller;
 
 import br.com.helio.springmvc.dto.customer.CustomerCreationRequest;
 import br.com.helio.springmvc.dto.customer.CustomerDetails;
+import br.com.helio.springmvc.dto.customer.CustomerUpdateRequest;
 import br.com.helio.springmvc.service.CustomerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -17,9 +20,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.hamcrest.core.Is.is;
 
@@ -108,5 +110,25 @@ class CustomerControllerTest {
             .andExpect(status().isCreated())
             .andExpect(header().exists("Location"))
             .andExpect(header().string("Location", "/api/v1/customers/" + testCustomer.id()));
+    }
+
+    @Test
+    void testUpdateCustomer() throws Exception {
+        CustomerDetails testCustomer = customersList.getFirst();
+        CustomerUpdateRequest customerUpdateRequest = new CustomerUpdateRequest(testCustomer.name());
+        mockMvc.perform(put("/api/v1/customers/" + testCustomer.id())
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(customerUpdateRequest))
+        )
+                .andExpect(status().isNoContent());
+
+        ArgumentCaptor<CustomerUpdateRequest> captor = ArgumentCaptor.forClass(CustomerUpdateRequest.class);
+
+        verify(customerService, times(1))
+                .updateCustomerById(eq(testCustomer.id()), captor.capture());
+
+        CustomerUpdateRequest capturedRequest = captor.getValue();
+        Assertions.assertEquals(testCustomer.name(), capturedRequest.name());
     }
 }
