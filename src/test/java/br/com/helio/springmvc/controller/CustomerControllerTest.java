@@ -5,7 +5,6 @@ import br.com.helio.springmvc.dto.customer.CustomerDetails;
 import br.com.helio.springmvc.dto.customer.CustomerUpdateRequest;
 import br.com.helio.springmvc.service.CustomerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -20,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -131,7 +131,7 @@ class CustomerControllerTest {
                 .updateCustomerById(eq(testCustomer.id()), customerUpdateRequestArgumentCaptor.capture());
 
         CustomerUpdateRequest capturedRequest = customerUpdateRequestArgumentCaptor.getValue();
-        Assertions.assertEquals(testCustomer.name(), capturedRequest.name());
+        assertThat(capturedRequest.name()).isEqualTo(testCustomer.name());
     }
 
     @Test
