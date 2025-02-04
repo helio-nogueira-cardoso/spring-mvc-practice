@@ -3,6 +3,7 @@ package br.com.helio.springmvc.controller;
 import br.com.helio.springmvc.dto.customer.CustomerCreationRequest;
 import br.com.helio.springmvc.dto.customer.CustomerDetails;
 import br.com.helio.springmvc.dto.customer.CustomerUpdateRequest;
+import br.com.helio.springmvc.exception.NotFoundException;
 import br.com.helio.springmvc.service.CustomerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -75,5 +76,10 @@ public class CustomerController {
     @GetMapping(CUSTOMER_PATH_ID)
     public CustomerDetails getCustomerById(@PathVariable(CUSTOMER_ID_PATH_VARIABLE_NAME) UUID customerId) {
         return customerService.getCustomerDetaisById(customerId);
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<HttpStatus> handleNotFoundException() {
+        return ResponseEntity.notFound().build();
     }
 }

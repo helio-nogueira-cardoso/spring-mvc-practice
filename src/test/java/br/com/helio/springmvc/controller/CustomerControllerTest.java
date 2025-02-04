@@ -3,6 +3,7 @@ package br.com.helio.springmvc.controller;
 import br.com.helio.springmvc.dto.customer.CustomerCreationRequest;
 import br.com.helio.springmvc.dto.customer.CustomerDetails;
 import br.com.helio.springmvc.dto.customer.CustomerUpdateRequest;
+import br.com.helio.springmvc.exception.NotFoundException;
 import br.com.helio.springmvc.service.CustomerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -80,6 +81,19 @@ class CustomerControllerTest {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.id",  is(testCustomerDetails.id().toString())))
             .andExpect(jsonPath("$.name", is(testCustomerDetails.name())));
+    }
+
+    @Test
+    void getCustomerByIdNotFound() throws Exception {
+        when(customerService.getCustomerDetaisById(any(UUID.class)))
+                .thenThrow(NotFoundException.class);
+
+        mockMvc
+            .perform(
+                get(CustomerController.CUSTOMER_PATH_ID, UUID.randomUUID())
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isNotFound());
     }
 
     @Test
