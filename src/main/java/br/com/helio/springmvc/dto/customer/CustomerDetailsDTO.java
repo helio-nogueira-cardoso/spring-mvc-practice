@@ -13,4 +13,17 @@ public record CustomerDetailsDTO(
         LocalDateTime createdDate,
         LocalDateTime lastModifiedDate
 ) {
+    /**
+     * Constructor only for previous Map Implementation of Service.
+     * Later using Mappers to covert between dtos and entities.
+     */
+    public CustomerDetailsDTO(br.com.helio.springmvc.models.Customer customer) {
+        this(
+                customer.getId(),
+                customer.getName(),
+                customer.getVersion(),
+                customer.getCreatedDate(),
+                customer.getLastModifiedDate()
+        );
+    }
 }
