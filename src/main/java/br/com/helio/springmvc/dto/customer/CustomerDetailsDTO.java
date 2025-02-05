@@ -1,10 +1,11 @@
 package br.com.helio.springmvc.dto.customer;
 
-import br.com.helio.springmvc.models.Customer;
+import lombok.Builder;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Builder
 public record CustomerDetailsDTO(
         UUID id,
         String name,
@@ -12,13 +13,4 @@ public record CustomerDetailsDTO(
         LocalDateTime createdDate,
         LocalDateTime lastModifiedDate
 ) {
-    public CustomerDetailsDTO(Customer customer) {
-        this(
-                customer.getId(),
-                customer.getName(),
-                customer.getVersion(),
-                customer.getCreatedDate(),
-                customer.getLastModifiedDate()
-        );
-    }
 }

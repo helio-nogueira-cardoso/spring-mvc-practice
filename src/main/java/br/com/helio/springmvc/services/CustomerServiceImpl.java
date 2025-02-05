@@ -3,101 +3,82 @@ package br.com.helio.springmvc.services;
 import br.com.helio.springmvc.dto.customer.CustomerCreationRequestDTO;
 import br.com.helio.springmvc.dto.customer.CustomerDetailsDTO;
 import br.com.helio.springmvc.dto.customer.CustomerUpdateRequestDTO;
-import br.com.helio.springmvc.models.Customer;
+import br.com.helio.springmvc.entities.Customer;
+import br.com.helio.springmvc.mappers.CustomerMapper;
+import br.com.helio.springmvc.repositories.CustomerRepository;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
+@RequiredArgsConstructor
 public class CustomerServiceImpl implements CustomerService {
-    Map<UUID, Customer> customerMap;
-
-    public CustomerServiceImpl() {
-        customerMap = new HashMap<>();
-
-        Customer customer1 = Customer.builder()
-                .id(UUID.randomUUID())
-                .version(1)
-                .name("Alejadro Borges")
-                .createdDate(LocalDateTime.now())
-                .lastModifiedDate(LocalDateTime.now())
-                .build();
-
-        Customer customer2 = Customer.builder()
-                .id(UUID.randomUUID())
-                .version(1)
-                .name("Antonio Carlos Tirezias")
-                .createdDate(LocalDateTime.now())
-                .lastModifiedDate(LocalDateTime.now())
-                .build();
-
-        Customer customer3 = Customer.builder()
-                .id(UUID.randomUUID())
-                .version(1)
-                .name("John Grock")
-                .createdDate(LocalDateTime.now())
-                .lastModifiedDate(LocalDateTime.now())
-                .build();
-
-        customerMap.put(customer1.getId(), customer1);
-        customerMap.put(customer2.getId(), customer2);
-        customerMap.put(customer3.getId(), customer3);
-    }
+    private final CustomerRepository customerRepository;
+    private final CustomerMapper customerMapper;
 
     @Override
     public List<CustomerDetailsDTO> listCustomers() {
-        return customerMap.values().stream().map(CustomerDetailsDTO::new).toList();
+        return customerRepository
+                .findAll()
+                .stream()
+                .map(customerMapper::customerToCustomerDetailsDto)
+                .toList();
     }
 
     @Override
     public Optional<CustomerDetailsDTO> getCustomerDetaisById(UUID id) {
-        return Optional.of(new CustomerDetailsDTO(customerMap.get(id)));
+        return customerRepository.findById(id).map(customerMapper::customerToCustomerDetailsDto);
     }
 
     @Override
     public CustomerDetailsDTO saveNewCustomer(CustomerCreationRequestDTO request) {
         Customer newCustomer = Customer.builder()
-                .id(UUID.randomUUID())
-                .version(1)
                 .name(request.name())
                 .createdDate(LocalDateTime.now())
                 .lastModifiedDate(LocalDateTime.now())
                 .build();
 
-        customerMap.put(newCustomer.getId(), newCustomer);
+        Customer savedCustomer = customerRepository.save(newCustomer);
 
-        return new CustomerDetailsDTO(newCustomer);
+        return customerMapper.customerToCustomerDetailsDto(savedCustomer);
     }
 
     @Override
+    @Transactional
     public void updateCustomerById(UUID customerId, CustomerUpdateRequestDTO request) {
-        Customer existingCustomer = customerMap.get(customerId);
+        Optional<Customer> optionalCustomer = customerRepository.findById(customerId);
 
-        if (existingCustomer == null) {
-            this.saveNewCustomer(new CustomerCreationRequestDTO(request.name()));
-            return;
+        if (optionalCustomer.isPresent()) {
+            Customer existingCustomer = optionalCustomer.get();
+            existingCustomer.setName(request.name());
+            existingCustomer.setLastModifiedDate(LocalDateTime.now());
         }
-
-        existingCustomer.setName(request.name());
-        existingCustomer.setLastModifiedDate(LocalDateTime.now());
-
-        customerMap.put(existingCustomer.getId(), existingCustomer);
+        else {
+            saveNewCustomer(
+                customerMapper.customerUpdateRequestDtoToCustomerCreationRequestDto(
+                    request
+                )
+            );
+        }
     }
 
     @Override
     public void deleteCustomerById(UUID customerId) {
-        customerMap.remove(customerId);
+        customerRepository.deleteById(customerId);
     }
 
     @Override
+    @Transactional
     public void patchCustomerById(UUID customerId, CustomerUpdateRequestDTO request) {
-        Customer existingCustomer = customerMap.get(customerId);
+        Optional<Customer> optionalCustomer = customerRepository.findById(customerId);
 
-        if (existingCustomer != null && request.name() != null) {
+        if (optionalCustomer.isPresent() && request.name() != null) {
+            Customer existingCustomer = optionalCustomer.get();
             existingCustomer.setName(request.name());
             existingCustomer.setLastModifiedDate(LocalDateTime.now());
-            customerMap.put(existingCustomer.getId(), existingCustomer);
         }
     }
 }
