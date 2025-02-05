@@ -30,7 +30,7 @@ public class CustomerController {
         HttpHeaders headers = new HttpHeaders();
         String location = UriComponentsBuilder
             .fromPath(CUSTOMER_PATH_ID)
-            .buildAndExpand(customerId)
+            .buildAndExpand(customerId.toString())
             .toUriString();
 
         headers.add("Location", location);
@@ -45,6 +45,7 @@ public class CustomerController {
         customerService.patchCustomerById(customerId, request);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
     @DeleteMapping(CUSTOMER_PATH_ID)
     public ResponseEntity<HttpStatus> deleteById(@PathVariable(CUSTOMER_ID_PATH_VARIABLE_NAME) UUID customerId) {
         customerService.deleteCustomerById(customerId);
