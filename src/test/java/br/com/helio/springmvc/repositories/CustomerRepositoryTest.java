@@ -2,16 +2,17 @@ package br.com.helio.springmvc.repositories;
 
 import br.com.helio.springmvc.bootstrap.BootstrapData;
 import br.com.helio.springmvc.entities.Customer;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.annotation.Rollback;
 
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class CustomerRepositoryTest {
     @Autowired
     CustomerRepository customerRepository;
@@ -24,14 +25,14 @@ class CustomerRepositoryTest {
     }
 
     @Test
-    @Order(1)
     void testBootstrappedData() {
         bootstrapData.run();
         assertThat(customerRepository.count()).isEqualTo(5);
     }
 
     @Test
-    @Order(2)
+    @Transactional
+    @Rollback
     void saveCustomer() {
         Customer saveCustomer = customerRepository.save(
             Customer.builder()
