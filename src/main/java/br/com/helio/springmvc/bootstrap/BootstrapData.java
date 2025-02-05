@@ -1,14 +1,14 @@
 package br.com.helio.springmvc.bootstrap;
 
-import br.com.helio.springmvc.dto.customer.CustomerCreationRequestDTO;
-import br.com.helio.springmvc.dto.customer.CustomerDetailsDTO;
-import br.com.helio.springmvc.services.CustomerService;
+import br.com.helio.springmvc.entities.Customer;
+import br.com.helio.springmvc.repositories.CustomerRepository;
 import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -17,22 +17,24 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class BootstrapData implements CommandLineRunner {
-    private final CustomerService customerService;
+    private final CustomerRepository customerRepository;
     private final List<UUID> registeredCustomerIds = new ArrayList<>();
 
-    private void addNewCustomer(CustomerCreationRequestDTO customerCreationRequest) {
-        CustomerDetailsDTO savedCustomerDetails = customerService.saveNewCustomer(customerCreationRequest);
-        registeredCustomerIds.add(savedCustomerDetails.id());
-        log.debug(" ## Adding bootstrap customer | id = {}", savedCustomerDetails.id());
+    private void addNewCustomer(Customer.CustomerBuilder newCustomerBuilder) {
+        newCustomerBuilder.createdDate(LocalDateTime.now());
+        newCustomerBuilder.lastModifiedDate(LocalDateTime.now());
+        Customer savedCustomer = customerRepository.save(newCustomerBuilder.build());
+        registeredCustomerIds.add(savedCustomer.getId());
+        log.debug(" ## Adding bootstrap customer | id = {}", savedCustomer.getId());
     }
 
     @Override
     public void run(String... args) {
-        addNewCustomer(CustomerCreationRequestDTO.builder().name("Customer 1").build());
-        addNewCustomer(CustomerCreationRequestDTO.builder().name("Customer 2").build());
-        addNewCustomer(CustomerCreationRequestDTO.builder().name("Customer 3").build());
-        addNewCustomer(CustomerCreationRequestDTO.builder().name("Customer 4").build());
-        addNewCustomer(CustomerCreationRequestDTO.builder().name("Customer 5").build());
+        addNewCustomer(Customer.builder().name("Customer 1"));
+        addNewCustomer(Customer.builder().name("Customer 2"));
+        addNewCustomer(Customer.builder().name("Customer 3"));
+        addNewCustomer(Customer.builder().name("Customer 4"));
+        addNewCustomer(Customer.builder().name("Customer 5"));
     }
 
     /**
@@ -43,6 +45,6 @@ public class BootstrapData implements CommandLineRunner {
     @PreDestroy
     public void destroyAllBootstrappedData() {
         log.debug("## Destroying all bootstrapped data");
-        registeredCustomerIds.forEach(customerService::deleteCustomerById);
+        customerRepository.deleteAllById(registeredCustomerIds);
     }
 }
