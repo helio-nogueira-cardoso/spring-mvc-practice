@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 @Primary
@@ -38,6 +39,7 @@ public class CustomerServiceJPAImpl implements CustomerService {
     }
 
     @Override
+    @Transactional
     public CustomerDetailsDTO saveNewCustomer(CustomerCreationRequestDTO request) {
         Customer newCustomer = Customer.builder()
                 .name(request.name())
@@ -52,27 +54,29 @@ public class CustomerServiceJPAImpl implements CustomerService {
     @Override
     @Transactional
     public CustomerDetailsDTO updateCustomerById(UUID customerId, CustomerUpdateRequestDTO request) {
-        Optional<Customer> optionalCustomer = customerRepository.findById(customerId);
+        AtomicReference<CustomerDetailsDTO> returnCustomer = new AtomicReference<>();
 
-        if (optionalCustomer.isPresent()) {
-            Customer existingCustomer = optionalCustomer.get();
+        customerRepository.findById(customerId).ifPresentOrElse(foundCustomer -> {
+            foundCustomer.setName(request.name());
+            foundCustomer.setLastModifiedDate(LocalDateTime.now());
+            returnCustomer.set(customerMapper.customerToCustomerDetailsDto(foundCustomer));
+        }, () -> returnCustomer.set(
+                saveNewCustomer(customerMapper.customerUpdateRequestDtoToCustomerCreationRequestDto(
+                        request
+                ))
+        ));
 
-            existingCustomer.setName(request.name());
-            existingCustomer.setLastModifiedDate(LocalDateTime.now());
-
-            return customerMapper.customerToCustomerDetailsDto(existingCustomer);
-        }
-
-        return saveNewCustomer(
-            customerMapper.customerUpdateRequestDtoToCustomerCreationRequestDto(
-                request
-            )
-        );
+        return returnCustomer.get();
     }
 
     @Override
-    public void deleteCustomerById(UUID customerId) {
-        customerRepository.deleteById(customerId);
+    public boolean deleteCustomerById(UUID customerId) {
+        if (customerRepository.existsById(customerId)) {
+            customerRepository.deleteById(customerId);
+            return true;
+        }
+
+        return false;
     }
 
     @Override

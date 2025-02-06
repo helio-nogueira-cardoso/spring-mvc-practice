@@ -219,13 +219,33 @@ class CustomerControllerTest {
     @Test
     void testDeleteCustomer() throws Exception {
         CustomerDetailsDTO testCustomer = customersList.getFirst();
+        final UUID ID_TO_BE_DELETED = testCustomer.id();
+        when(customerService.deleteCustomerById(eq(ID_TO_BE_DELETED)))
+                .thenReturn(true);
+
         mockMvc.perform(
-            delete(CustomerController.CUSTOMER_PATH_ID, testCustomer.id())
+            delete(CustomerController.CUSTOMER_PATH_ID, ID_TO_BE_DELETED)
                 .accept(MediaType.APPLICATION_JSON)
         )
             .andExpect(status().isNoContent());
 
         verify(customerService, times(1))
-            .deleteCustomerById(eq(testCustomer.id()));
+            .deleteCustomerById(eq(ID_TO_BE_DELETED));
+    }
+
+    @Test
+    void testDeleteCustomerNotFound() throws Exception {
+        final UUID ABSENT_ID = UUID.randomUUID();
+        when(customerService.deleteCustomerById(eq(ABSENT_ID)))
+                .thenReturn(false);
+
+        mockMvc.perform(
+                        delete(CustomerController.CUSTOMER_PATH_ID, ABSENT_ID)
+                                .accept(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isNotFound());
+
+        verify(customerService, times(1))
+                .deleteCustomerById(eq(ABSENT_ID));
     }
 }

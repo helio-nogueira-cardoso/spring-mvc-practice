@@ -116,13 +116,31 @@ class CustomerControllerIT {
         final UUID ABSENT_ID = getNotPresentUUID();
         CustomerUpdateRequestDTO updateRequestDto = CustomerUpdateRequestDTO.builder().name(UPDATED_NAME).build();
 
-        assertThat(customerRepository.findById(ABSENT_ID).isPresent()).isFalse();
+        assertThat(customerRepository.existsById(ABSENT_ID)).isFalse();
 
         ResponseEntity<HttpStatus> response = customerController.updateById(ABSENT_ID, updateRequestDto);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(response.getHeaders().getLocation()).isNotNull();
 
-        Optional<Customer> optionalCustomer = customerRepository.findById(getIdFromHeaders(response.getHeaders()));
-        assertThat(optionalCustomer.isPresent()).isTrue();
+        assertThat(customerRepository.existsById(getIdFromHeaders(response.getHeaders()))).isTrue();
+    }
+
+    @Test
+    @Transactional
+    @Rollback
+    void testDelete() {
+        Customer existingCustomer = customerRepository.findAll().getFirst();
+        final UUID ID_TO_BE_DELETED = existingCustomer.getId();
+
+        ResponseEntity<HttpStatus> response = customerController.deleteById(ID_TO_BE_DELETED);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(customerRepository.findById(ID_TO_BE_DELETED).isEmpty()).isTrue();
+    }
+
+    @Test
+    void testDeleteNotFound() {
+        final UUID ABSENT_ID = getNotPresentUUID();
+        assertThrows(NotFoundException.class, () -> customerController.deleteById(ABSENT_ID));
     }
 }
