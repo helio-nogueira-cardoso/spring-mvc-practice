@@ -13,6 +13,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -69,7 +70,7 @@ class CustomerControllerTest {
     void getCustomerById() throws Exception {
         CustomerDetailsDTO testCustomerDetailsDTO = customersList.getFirst();
 
-        when(customerService.getCustomerDetaisById(testCustomerDetailsDTO.id()))
+        when(customerService.getCustomerDetailsById(testCustomerDetailsDTO.id()))
                 .thenReturn(Optional.of(testCustomerDetailsDTO));
 
         mockMvc
@@ -85,7 +86,7 @@ class CustomerControllerTest {
 
     @Test
     void getCustomerByIdNotFound() throws Exception {
-        when(customerService.getCustomerDetaisById(any(UUID.class)))
+        when(customerService.getCustomerDetailsById(any(UUID.class)))
                 .thenReturn(Optional.empty());
 
         mockMvc
@@ -112,7 +113,7 @@ class CustomerControllerTest {
     }
 
     @Test
-    void handlePost() throws Exception {
+    void saveNewCustomer() throws Exception {
         CustomerDetailsDTO testCustomer = customersList.getFirst();
         CustomerCreationRequestDTO request = new CustomerCreationRequestDTO(testCustomer.name());
 
@@ -127,26 +128,92 @@ class CustomerControllerTest {
         )
             .andExpect(status().isCreated())
             .andExpect(header().exists("Location"))
-            .andExpect(header().string("Location", "/api/v1/customers/" + testCustomer.id()));
+            .andExpect(
+                header().string("Location",
+                    UriComponentsBuilder
+                            .fromPath(CustomerController.CUSTOMER_PATH_ID)
+                            .buildAndExpand(testCustomer.id())
+                            .toUriString()
+                )
+            );
     }
 
     @Test
-    void testUpdateCustomer() throws Exception {
+    void testUpdateExistingCustomer() throws Exception {
+        // Arrange
+        final String NEW_NAME = "UPDATED";
         CustomerDetailsDTO testCustomer = customersList.getFirst();
-        CustomerUpdateRequestDTO customerUpdateRequestDTO = new CustomerUpdateRequestDTO(testCustomer.name());
+        CustomerDetailsDTO expectedUpdatedCustomer = CustomerDetailsDTO.builder()
+                .id(testCustomer.id())
+                .name(NEW_NAME)
+                .version(testCustomer.version())
+                .createdDate(testCustomer.createdDate())
+                .lastModifiedDate(testCustomer.lastModifiedDate())
+                .build();
+
+        when(customerService.updateCustomerById(eq(testCustomer.id()), any(CustomerUpdateRequestDTO.class)))
+                .thenReturn(expectedUpdatedCustomer);
+
+        // Act
+        CustomerUpdateRequestDTO customerUpdateRequestDTO = new CustomerUpdateRequestDTO(NEW_NAME);
         mockMvc.perform(
             put(CustomerController.CUSTOMER_PATH_ID, testCustomer.id())
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(customerUpdateRequestDTO))
         )
-            .andExpect(status().isNoContent());
+            .andExpect(status().isNoContent())
+            .andExpect(header().doesNotExist("Location"));
 
         verify(customerService, times(1))
             .updateCustomerById(eq(testCustomer.id()), customerUpdateRequestArgumentCaptor.capture());
 
         CustomerUpdateRequestDTO capturedRequest = customerUpdateRequestArgumentCaptor.getValue();
-        assertThat(capturedRequest.name()).isEqualTo(testCustomer.name());
+        assertThat(capturedRequest.name()).isEqualTo(NEW_NAME);
+    }
+
+    @Test
+    void testUpdateAbsentCustomer() throws Exception {
+        // Arrange
+        final String NEW_NAME = "UPDATED";
+        final UUID NEW_CUSTOMER_UUID = UUID.randomUUID();
+
+        CustomerDetailsDTO testCustomer = customersList.getFirst();
+        CustomerDetailsDTO expectedNewCustomer = CustomerDetailsDTO.builder()
+                .id(NEW_CUSTOMER_UUID)
+                .name(NEW_NAME)
+                .version(1)
+                .createdDate(LocalDateTime.now())
+                .lastModifiedDate(LocalDateTime.now())
+                .build();
+
+        when(customerService.updateCustomerById(eq(testCustomer.id()), any(CustomerUpdateRequestDTO.class)))
+                .thenReturn(expectedNewCustomer);
+
+        // Act
+        CustomerUpdateRequestDTO customerUpdateRequestDTO = new CustomerUpdateRequestDTO(NEW_NAME);
+        mockMvc.perform(
+                        put(CustomerController.CUSTOMER_PATH_ID, testCustomer.id())
+                                .accept(MediaType.APPLICATION_JSON)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(customerUpdateRequestDTO))
+                )
+                .andExpect(status().isCreated())
+                .andExpect(header().exists("Location"))
+                .andExpect(
+                        header().string("Location",
+                                UriComponentsBuilder
+                                        .fromPath(CustomerController.CUSTOMER_PATH_ID)
+                                        .buildAndExpand(NEW_CUSTOMER_UUID)
+                                        .toUriString()
+                        )
+                );
+
+        verify(customerService, times(1))
+                .updateCustomerById(eq(testCustomer.id()), customerUpdateRequestArgumentCaptor.capture());
+
+        CustomerUpdateRequestDTO capturedRequest = customerUpdateRequestArgumentCaptor.getValue();
+        assertThat(capturedRequest.name()).isEqualTo(NEW_NAME);
     }
 
     @Test

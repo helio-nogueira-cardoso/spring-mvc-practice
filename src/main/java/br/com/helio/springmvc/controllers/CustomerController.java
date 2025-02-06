@@ -57,8 +57,16 @@ public class CustomerController {
             @PathVariable(CUSTOMER_ID_PATH_VARIABLE_NAME) UUID customerId,
             @RequestBody CustomerUpdateRequestDTO request
     ) {
-        customerService.updateCustomerById(customerId, request);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        CustomerDetailsDTO customerDetailsDTO = customerService.updateCustomerById(customerId, request);
+
+        // Customer existed, none was created, just updated
+        if (customerDetailsDTO.id().toString().equals(customerId.toString())) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        // Customer did not exist, so one was created
+        HttpHeaders headers = buildLocationHeader(customerDetailsDTO.id());
+        return new ResponseEntity<>(headers, HttpStatus.CREATED);
     }
 
     @PostMapping(CUSTOMER_PATH)
@@ -76,6 +84,6 @@ public class CustomerController {
 
     @GetMapping(CUSTOMER_PATH_ID)
     public CustomerDetailsDTO getCustomerById(@PathVariable(CUSTOMER_ID_PATH_VARIABLE_NAME) UUID customerId) {
-        return customerService.getCustomerDetaisById(customerId).orElseThrow(NotFoundException::new);
+        return customerService.getCustomerDetailsById(customerId).orElseThrow(NotFoundException::new);
     }
 }

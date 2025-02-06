@@ -8,6 +8,7 @@ import br.com.helio.springmvc.mappers.CustomerMapper;
 import br.com.helio.springmvc.repositories.CustomerRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,7 @@ import java.util.*;
 @Service
 @Primary
 @RequiredArgsConstructor
+@Slf4j
 public class CustomerServiceJPAImpl implements CustomerService {
     private final CustomerRepository customerRepository;
     private final CustomerMapper customerMapper;
@@ -31,7 +33,7 @@ public class CustomerServiceJPAImpl implements CustomerService {
     }
 
     @Override
-    public Optional<CustomerDetailsDTO> getCustomerDetaisById(UUID id) {
+    public Optional<CustomerDetailsDTO> getCustomerDetailsById(UUID id) {
         return customerRepository.findById(id).map(customerMapper::customerToCustomerDetailsDto);
     }
 
@@ -44,27 +46,28 @@ public class CustomerServiceJPAImpl implements CustomerService {
                 .build();
 
         Customer savedCustomer = customerRepository.save(newCustomer);
-
         return customerMapper.customerToCustomerDetailsDto(savedCustomer);
     }
 
     @Override
     @Transactional
-    public void updateCustomerById(UUID customerId, CustomerUpdateRequestDTO request) {
+    public CustomerDetailsDTO updateCustomerById(UUID customerId, CustomerUpdateRequestDTO request) {
         Optional<Customer> optionalCustomer = customerRepository.findById(customerId);
 
         if (optionalCustomer.isPresent()) {
             Customer existingCustomer = optionalCustomer.get();
+
             existingCustomer.setName(request.name());
             existingCustomer.setLastModifiedDate(LocalDateTime.now());
+
+            return customerMapper.customerToCustomerDetailsDto(existingCustomer);
         }
-        else {
-            saveNewCustomer(
-                customerMapper.customerUpdateRequestDtoToCustomerCreationRequestDto(
-                    request
-                )
-            );
-        }
+
+        return saveNewCustomer(
+            customerMapper.customerUpdateRequestDtoToCustomerCreationRequestDto(
+                request
+            )
+        );
     }
 
     @Override

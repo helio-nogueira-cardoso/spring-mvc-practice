@@ -51,7 +51,7 @@ public class CustomerServiceMapImpl implements CustomerService {
     }
 
     @Override
-    public Optional<CustomerDetailsDTO> getCustomerDetaisById(UUID id) {
+    public Optional<CustomerDetailsDTO> getCustomerDetailsById(UUID id) {
         return Optional.of(new CustomerDetailsDTO(customerMap.get(id)));
     }
 
@@ -71,18 +71,19 @@ public class CustomerServiceMapImpl implements CustomerService {
     }
 
     @Override
-    public void updateCustomerById(UUID customerId, CustomerUpdateRequestDTO request) {
+    public CustomerDetailsDTO updateCustomerById(UUID customerId, CustomerUpdateRequestDTO request) {
         Customer existingCustomer = customerMap.get(customerId);
 
         if (existingCustomer == null) {
-            this.saveNewCustomer(new CustomerCreationRequestDTO(request.name()));
-            return;
+            return this.saveNewCustomer(new CustomerCreationRequestDTO(request.name()));
         }
 
         existingCustomer.setName(request.name());
         existingCustomer.setLastModifiedDate(LocalDateTime.now());
 
         customerMap.put(existingCustomer.getId(), existingCustomer);
+
+        return new CustomerDetailsDTO(existingCustomer);
     }
 
     @Override
