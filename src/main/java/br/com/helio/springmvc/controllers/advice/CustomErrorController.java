@@ -1,4 +1,4 @@
-package br.com.helio.springmvc.controllers.exceptionHandlers;
+package br.com.helio.springmvc.controllers.advice;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;

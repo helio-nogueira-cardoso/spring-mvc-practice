@@ -4,6 +4,7 @@ import br.com.helio.springmvc.bootstrap.BootstrapData;
 import br.com.helio.springmvc.entities.Customer;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolationException;
+import net.bytebuddy.utility.RandomString;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -58,6 +59,23 @@ class CustomerRepositoryTest {
             customerRepository.save(
                     Customer.builder()
                             .name("")
+                            .build()
+            );
+
+            customerRepository.flush();
+        });
+    }
+
+    @Test
+    @Transactional
+    @Rollback
+    void tryToSaveTooLongNameCustomer() {
+        assertThrows(ConstraintViolationException.class, () -> {
+            customerRepository.save(
+                    Customer.builder()
+                            .name(RandomString.make(51))
+                            .createdDate(LocalDateTime.now())
+                            .lastModifiedDate(LocalDateTime.now())
                             .build()
             );
 
