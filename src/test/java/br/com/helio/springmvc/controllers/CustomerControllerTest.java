@@ -5,6 +5,7 @@ import br.com.helio.springmvc.dto.customer.CustomerDetailsDTO;
 import br.com.helio.springmvc.dto.customer.CustomerUpdateRequestDTO;
 import br.com.helio.springmvc.services.CustomerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -13,6 +14,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.LocalDateTime;
@@ -247,5 +249,27 @@ class CustomerControllerTest {
 
         verify(customerService, times(1))
                 .deleteCustomerById(eq(ABSENT_ID));
+    }
+
+    @Test
+    void emptyCustomerShouldNotBeSaved() throws Exception {
+        CustomerCreationRequestDTO emptyRequest = CustomerCreationRequestDTO.builder().build();
+        when(customerService.saveNewCustomer(any(CustomerCreationRequestDTO.class)))
+                .thenReturn(customersList.getFirst());
+
+        MvcResult mvcResult = mockMvc.perform(
+                        post(CustomerController.CUSTOMER_PATH)
+                                .accept(MediaType.APPLICATION_JSON)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(emptyRequest))
+                )
+                .andExpect(status().isBadRequest()).andReturn();
+
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+        System.out.println(jsonResponse);
+
+        List<String> names = JsonPath.read(jsonResponse, "$[*].name");
+        boolean hasExpectedName = names.stream().anyMatch(name -> name.equals("must not be blank"));
+        assertThat(hasExpectedName).isTrue();
     }
 }

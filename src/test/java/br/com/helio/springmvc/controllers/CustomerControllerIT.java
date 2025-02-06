@@ -83,7 +83,7 @@ class CustomerControllerIT {
                 .name("New Customer")
                 .build();
 
-        ResponseEntity<HttpStatus> response = customerController.handlePost(dto);
+        ResponseEntity<HttpStatus> response = customerController.saveNewCustomer(dto);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(response.getHeaders().getLocation()).isNotNull();

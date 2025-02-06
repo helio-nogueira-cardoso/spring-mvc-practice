@@ -5,6 +5,7 @@ import br.com.helio.springmvc.dto.customer.CustomerDetailsDTO;
 import br.com.helio.springmvc.dto.customer.CustomerUpdateRequestDTO;
 import br.com.helio.springmvc.exceptions.NotFoundException;
 import br.com.helio.springmvc.services.CustomerService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -58,7 +59,7 @@ public class CustomerController {
     @PutMapping(CUSTOMER_PATH_ID)
     public ResponseEntity<HttpStatus> updateById(
             @PathVariable(CUSTOMER_ID_PATH_VARIABLE_NAME) UUID customerId,
-            @RequestBody CustomerUpdateRequestDTO request
+            @Valid @RequestBody CustomerUpdateRequestDTO request
     ) {
         CustomerDetailsDTO customerDetailsDTO = customerService.updateCustomerById(customerId, request);
 
@@ -73,7 +74,7 @@ public class CustomerController {
     }
 
     @PostMapping(CUSTOMER_PATH)
-    public ResponseEntity<HttpStatus> handlePost(@RequestBody CustomerCreationRequestDTO request) {
+    public ResponseEntity<HttpStatus> saveNewCustomer(@Valid @RequestBody CustomerCreationRequestDTO request) {
         log.debug("Creating new client");
         CustomerDetailsDTO customerDetailsDTO = customerService.saveNewCustomer(request);
         HttpHeaders headers = buildLocationHeader(customerDetailsDTO.id());
