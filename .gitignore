@@ -31,3 +31,32 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Logs ###
+*.log
+*.out
+*.err
+
+### OS-specific ###
+.DS_Store       # macOS
+Thumbs.db       # Windows
+
+### Docker ###
+docker-compose.override.yml  # Local override for Docker Compose
+**/db_data/                  # Docker persistent volumes (adjust if volumes are stored in project)
+.docker/                     # Temporary Docker files (if applicable)
+
+### Environment files ###
+.env                      # Environment variable files (e.g., for Docker or app config)
+
+### Temporary files ###
+*.tmp
+*.bak
+*.swp
+*.swo
+
+### Generated files ###
+/out/                     # If there is a general `out` directory
+*.class                   # Compiled Java files
+*.jar                     # Built JAR files (if applicable)
+*.war                     # Built WAR files (if applicable)
