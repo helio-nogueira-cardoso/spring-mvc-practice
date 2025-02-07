@@ -75,7 +75,6 @@ public class CustomerController {
 
     @PostMapping(CUSTOMER_PATH)
     public ResponseEntity<HttpStatus> saveNewCustomer(@Valid @RequestBody CustomerCreationRequestDTO request) {
-        log.debug("Creating new client");
         CustomerDetailsDTO customerDetailsDTO = customerService.saveNewCustomer(request);
         HttpHeaders headers = buildLocationHeader(customerDetailsDTO.id());
         return new ResponseEntity<>(headers, HttpStatus.CREATED);

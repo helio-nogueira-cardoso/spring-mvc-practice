@@ -6,30 +6,42 @@ import br.com.helio.springmvc.dto.customer.CustomerUpdateRequestDTO;
 import br.com.helio.springmvc.entities.Customer;
 import br.com.helio.springmvc.exceptions.NotFoundException;
 import br.com.helio.springmvc.repositories.CustomerRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
+import net.bytebuddy.utility.RandomString;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.Rollback;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
+@AutoConfigureMockMvc
 class CustomerControllerIT {
     @Autowired
     CustomerController customerController;
 
     @Autowired
     CustomerRepository customerRepository;
+
+    @Autowired
+    MockMvc mockMvc;
+
+    @Autowired
+    ObjectMapper objectMapper;
 
     @Test
     void testListBeers() {
@@ -142,5 +154,29 @@ class CustomerControllerIT {
     void testDeleteNotFound() {
         final UUID ABSENT_ID = getNotPresentUUID();
         assertThrows(NotFoundException.class, () -> customerController.deleteById(ABSENT_ID));
+    }
+
+    @Test
+    /*
+      Do not use @Transactional when you want to simulate an error comming
+      from the database itself. Because the operations will be cached, and
+      then not validated by the database.
+     */
+    void testSaveTooLongNameCustomer() throws Exception {
+        MvcResult mvcResult = mockMvc.perform(
+                        post(CustomerController.CUSTOMER_PATH)
+                                .accept(MediaType.APPLICATION_JSON)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header("Accept-Language", "en-US")
+                                .content(
+                                        objectMapper.writeValueAsString(CustomerCreationRequestDTO.builder()
+                                                .name(RandomString.make(51))
+                                                .build())
+                                )
+                )
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        System.out.println(mvcResult.getResponse().getContentAsString());
     }
 }
