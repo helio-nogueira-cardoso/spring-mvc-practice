@@ -27,8 +27,6 @@ public class Customer {
     private UUID id;
 
     @Email
-    @JdbcTypeCode(SqlTypes.CHAR)
-    @Column(columnDefinition = "varchar(255)")
     private String email;
 
     @NotBlank
