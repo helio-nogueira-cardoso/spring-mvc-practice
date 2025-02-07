@@ -43,6 +43,7 @@ public class CustomerServiceJPAImpl implements CustomerService {
     public CustomerDetailsDTO saveNewCustomer(CustomerCreationRequestDTO request) {
         Customer newCustomer = Customer.builder()
                 .name(request.name())
+                .email(request.email())
                 .createdDate(LocalDateTime.now())
                 .lastModifiedDate(LocalDateTime.now())
                 .build();
@@ -58,6 +59,7 @@ public class CustomerServiceJPAImpl implements CustomerService {
 
         customerRepository.findById(customerId).ifPresentOrElse(foundCustomer -> {
             foundCustomer.setName(request.name());
+            foundCustomer.setEmail(request.email());
             foundCustomer.setLastModifiedDate(LocalDateTime.now());
             returnCustomer.set(customerMapper.customerToCustomerDetailsDto(foundCustomer));
         }, () -> returnCustomer.set(
@@ -84,10 +86,23 @@ public class CustomerServiceJPAImpl implements CustomerService {
     public void patchCustomerById(UUID customerId, CustomerUpdateRequestDTO request) {
         Optional<Customer> optionalCustomer = customerRepository.findById(customerId);
 
-        if (optionalCustomer.isPresent() && request.name() != null) {
+        if (optionalCustomer.isPresent()) {
             Customer existingCustomer = optionalCustomer.get();
-            existingCustomer.setName(request.name());
-            existingCustomer.setLastModifiedDate(LocalDateTime.now());
+            boolean modified = false;
+
+            if (request.name() != null) {
+                existingCustomer.setName(request.name());
+                modified = true;
+            }
+
+            if (request.email() != null) {
+                existingCustomer.setEmail(request.email());
+                modified = true;
+            }
+
+            if (modified) {
+                existingCustomer.setLastModifiedDate(LocalDateTime.now());
+            }
         }
     }
 }

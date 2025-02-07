@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.Rollback;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -30,6 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("localmysql")
 class CustomerControllerIT {
     @Autowired
     CustomerController customerController;
@@ -44,9 +46,10 @@ class CustomerControllerIT {
     ObjectMapper objectMapper;
 
     @Test
-    void testListBeers() {
+    void testListCustomers() {
+        long count = customerRepository.count();
         List<CustomerDetailsDTO> dtos = customerController.listCustomers();
-        assertThat(dtos.size()).isEqualTo(5);
+        assertThat(dtos.size()).isEqualTo(count);
     }
 
     @Test

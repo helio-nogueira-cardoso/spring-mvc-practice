@@ -9,6 +9,7 @@ import java.util.UUID;
 public record CustomerDetailsDTO(
         UUID id,
         String name,
+        String email,
         Integer version,
         LocalDateTime createdDate,
         LocalDateTime lastModifiedDate
@@ -21,6 +22,7 @@ public record CustomerDetailsDTO(
         this(
                 customer.getId(),
                 customer.getName(),
+                customer.getEmail(),
                 customer.getVersion(),
                 customer.getCreatedDate(),
                 customer.getLastModifiedDate()

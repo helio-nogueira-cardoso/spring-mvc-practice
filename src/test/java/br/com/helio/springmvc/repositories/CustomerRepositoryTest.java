@@ -9,6 +9,7 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.annotation.Rollback;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
 
@@ -16,6 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DataJpaTest
+@ActiveProfiles("localmysql")
 class CustomerRepositoryTest {
     @Autowired
     CustomerRepository customerRepository;
@@ -29,8 +31,9 @@ class CustomerRepositoryTest {
 
     @Test
     void testBootstrappedData() {
+        long count = customerRepository.count();
         bootstrapData.run();
-        assertThat(customerRepository.count()).isEqualTo(5);
+        assertThat(customerRepository.count()).isEqualTo(count + 5);
     }
 
     @Test

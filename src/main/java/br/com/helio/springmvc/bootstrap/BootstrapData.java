@@ -30,11 +30,11 @@ public class BootstrapData implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        addNewCustomer(Customer.builder().name("Customer 1"));
-        addNewCustomer(Customer.builder().name("Customer 2"));
-        addNewCustomer(Customer.builder().name("Customer 3"));
-        addNewCustomer(Customer.builder().name("Customer 4"));
-        addNewCustomer(Customer.builder().name("Customer 5"));
+        addNewCustomer(Customer.builder().name("Customer 1").email("customer1@mail.com"));
+        addNewCustomer(Customer.builder().name("Customer 2").email("customer2@mail.com"));
+        addNewCustomer(Customer.builder().name("Customer 3").email("customer3@mail.com"));
+        addNewCustomer(Customer.builder().name("Customer 4").email("customer4@mail.com"));
+        addNewCustomer(Customer.builder().name("Customer 5").email("customer5@mail.com"));
     }
 
     /**

@@ -12,6 +12,7 @@ import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -31,6 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.hamcrest.core.Is.is;
 
 @WebMvcTest(CustomerController.class)
+@ActiveProfiles("localmysql")
 class CustomerControllerTest {
     @Autowired
     MockMvc mockMvc;
@@ -48,6 +50,7 @@ class CustomerControllerTest {
         new CustomerDetailsDTO(
                 UUID.randomUUID(),
                 "Test Customer 1",
+                "customer1@mail.com",
                 1,
                 LocalDateTime.now(),
                 LocalDateTime.now()
@@ -55,6 +58,7 @@ class CustomerControllerTest {
         new CustomerDetailsDTO(
                 UUID.randomUUID(),
                 "Test Customer 2",
+                "customer2@mail.com",
                 1,
                 LocalDateTime.now(),
                 LocalDateTime.now()
@@ -62,6 +66,7 @@ class CustomerControllerTest {
         new CustomerDetailsDTO(
                 UUID.randomUUID(),
                 "Test Customer 3",
+                "customer3@mail.com",
                 1,
                 LocalDateTime.now(),
                 LocalDateTime.now()
@@ -83,7 +88,8 @@ class CustomerControllerTest {
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.id",  is(testCustomerDetailsDTO.id().toString())))
-            .andExpect(jsonPath("$.name", is(testCustomerDetailsDTO.name())));
+            .andExpect(jsonPath("$.name", is(testCustomerDetailsDTO.name())))
+            .andExpect(jsonPath("$.email", is(testCustomerDetailsDTO.email())));
     }
 
     @Test
@@ -117,7 +123,7 @@ class CustomerControllerTest {
     @Test
     void saveNewCustomer() throws Exception {
         CustomerDetailsDTO testCustomer = customersList.getFirst();
-        CustomerCreationRequestDTO request = new CustomerCreationRequestDTO(testCustomer.name());
+        CustomerCreationRequestDTO request = new CustomerCreationRequestDTO(testCustomer.name(), testCustomer.email());
 
         when(customerService.saveNewCustomer(any(CustomerCreationRequestDTO.class)))
                 .thenReturn(testCustomer);
@@ -144,10 +150,12 @@ class CustomerControllerTest {
     void testUpdateExistingCustomer() throws Exception {
         // Arrange
         final String NEW_NAME = "UPDATED";
+        final String NEW_EMAIL = "newemail@mail.com";
         CustomerDetailsDTO testCustomer = customersList.getFirst();
         CustomerDetailsDTO expectedUpdatedCustomer = CustomerDetailsDTO.builder()
                 .id(testCustomer.id())
                 .name(NEW_NAME)
+                .email(NEW_EMAIL)
                 .version(testCustomer.version())
                 .createdDate(testCustomer.createdDate())
                 .lastModifiedDate(testCustomer.lastModifiedDate())
@@ -157,7 +165,7 @@ class CustomerControllerTest {
                 .thenReturn(expectedUpdatedCustomer);
 
         // Act
-        CustomerUpdateRequestDTO customerUpdateRequestDTO = new CustomerUpdateRequestDTO(NEW_NAME);
+        CustomerUpdateRequestDTO customerUpdateRequestDTO = new CustomerUpdateRequestDTO(NEW_NAME, NEW_EMAIL);
         mockMvc.perform(
             put(CustomerController.CUSTOMER_PATH_ID, testCustomer.id())
                 .accept(MediaType.APPLICATION_JSON)
@@ -172,18 +180,21 @@ class CustomerControllerTest {
 
         CustomerUpdateRequestDTO capturedRequest = customerUpdateRequestArgumentCaptor.getValue();
         assertThat(capturedRequest.name()).isEqualTo(NEW_NAME);
+        assertThat(capturedRequest.email()).isEqualTo(NEW_EMAIL);
     }
 
     @Test
     void testUpdateAbsentCustomer() throws Exception {
         // Arrange
         final String NEW_NAME = "UPDATED";
+        final String NEW_EMAIL = "newemail@mail.com";
         final UUID NEW_CUSTOMER_UUID = UUID.randomUUID();
 
         CustomerDetailsDTO testCustomer = customersList.getFirst();
         CustomerDetailsDTO expectedNewCustomer = CustomerDetailsDTO.builder()
                 .id(NEW_CUSTOMER_UUID)
                 .name(NEW_NAME)
+                .email(NEW_EMAIL)
                 .version(1)
                 .createdDate(LocalDateTime.now())
                 .lastModifiedDate(LocalDateTime.now())
@@ -193,7 +204,7 @@ class CustomerControllerTest {
                 .thenReturn(expectedNewCustomer);
 
         // Act
-        CustomerUpdateRequestDTO customerUpdateRequestDTO = new CustomerUpdateRequestDTO(NEW_NAME);
+        CustomerUpdateRequestDTO customerUpdateRequestDTO = new CustomerUpdateRequestDTO(NEW_NAME, NEW_EMAIL);
         mockMvc.perform(
                         put(CustomerController.CUSTOMER_PATH_ID, testCustomer.id())
                                 .accept(MediaType.APPLICATION_JSON)
@@ -216,6 +227,7 @@ class CustomerControllerTest {
 
         CustomerUpdateRequestDTO capturedRequest = customerUpdateRequestArgumentCaptor.getValue();
         assertThat(capturedRequest.name()).isEqualTo(NEW_NAME);
+        assertThat(capturedRequest.email()).isEqualTo(NEW_EMAIL);
     }
 
     @Test

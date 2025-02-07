@@ -20,6 +20,7 @@ public class CustomerServiceMapImpl implements CustomerService {
                 .id(UUID.randomUUID())
                 .version(1)
                 .name("Alejadro Borges")
+                .email("alejandro@mail.com")
                 .createdDate(LocalDateTime.now())
                 .lastModifiedDate(LocalDateTime.now())
                 .build();
@@ -28,6 +29,7 @@ public class CustomerServiceMapImpl implements CustomerService {
                 .id(UUID.randomUUID())
                 .version(1)
                 .name("Antonio Carlos Tirezias")
+                .email("antonio@mail.com")
                 .createdDate(LocalDateTime.now())
                 .lastModifiedDate(LocalDateTime.now())
                 .build();
@@ -36,6 +38,7 @@ public class CustomerServiceMapImpl implements CustomerService {
                 .id(UUID.randomUUID())
                 .version(1)
                 .name("John Grock")
+                .email("john@mail.com")
                 .createdDate(LocalDateTime.now())
                 .lastModifiedDate(LocalDateTime.now())
                 .build();
@@ -61,6 +64,7 @@ public class CustomerServiceMapImpl implements CustomerService {
                 .id(UUID.randomUUID())
                 .version(1)
                 .name(request.name())
+                .email(request.email())
                 .createdDate(LocalDateTime.now())
                 .lastModifiedDate(LocalDateTime.now())
                 .build();
@@ -75,7 +79,7 @@ public class CustomerServiceMapImpl implements CustomerService {
         Customer existingCustomer = customerMap.get(customerId);
 
         if (existingCustomer == null) {
-            return this.saveNewCustomer(new CustomerCreationRequestDTO(request.name()));
+            return this.saveNewCustomer(new CustomerCreationRequestDTO(request.name(), request.email()));
         }
 
         existingCustomer.setName(request.name());
@@ -100,10 +104,23 @@ public class CustomerServiceMapImpl implements CustomerService {
     public void patchCustomerById(UUID customerId, CustomerUpdateRequestDTO request) {
         Customer existingCustomer = customerMap.get(customerId);
 
-        if (existingCustomer != null && request.name() != null) {
-            existingCustomer.setName(request.name());
-            existingCustomer.setLastModifiedDate(LocalDateTime.now());
-            customerMap.put(existingCustomer.getId(), existingCustomer);
+        if (existingCustomer != null) {
+            boolean modified = false;
+
+            if (request.name() != null) {
+                existingCustomer.setName(request.name());
+                modified = true;
+            }
+
+            if (request.email() != null) {
+                existingCustomer.setEmail(request.email());
+                modified = true;
+            }
+
+            if (modified) {
+                existingCustomer.setLastModifiedDate(LocalDateTime.now());
+                customerMap.put(existingCustomer.getId(), existingCustomer);
+            }
         }
     }
 }
