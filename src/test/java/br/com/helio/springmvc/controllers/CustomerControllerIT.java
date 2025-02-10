@@ -53,6 +53,12 @@ class CustomerControllerIT {
     }
 
     @Test
+    void testListCustomersByName() {
+        List<CustomerDetailsDTO> dtos = customerController.listCustomers("%lorem%");
+        assertThat(dtos.size()).isEqualTo(2);
+    }
+
+    @Test
     @Transactional
     @Rollback
     void testEmptyList() {
