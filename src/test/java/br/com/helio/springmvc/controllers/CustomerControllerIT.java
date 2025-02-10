@@ -69,6 +69,21 @@ class CustomerControllerIT {
     }
 
     @Test
+    @Transactional
+    @Rollback
+    void testLimitOfPageRequest() {
+        for (int i = 0; i < 1500; i++) {
+            customerRepository.save(Customer.builder()
+                        .name(RandomString.make(20))
+                        .email(RandomString.make(10) + "@mail.com")
+                    .build());
+        }
+
+        Page<CustomerDetailsDTO> customers = customerController.listCustomers(null, 1, 1500);
+        assertThat(customers.getContent().size()).isEqualTo(1000);
+    }
+
+    @Test
     void testGetById() {
         Customer customer = customerRepository.findAll().getFirst();
         CustomerDetailsDTO dto = customerController.getCustomerById(customer.getId());
