@@ -48,7 +48,7 @@ class CustomerControllerIT {
     @Test
     void testListCustomers() {
         long count = customerRepository.count();
-        List<CustomerDetailsDTO> dtos = customerController.listCustomers();
+        List<CustomerDetailsDTO> dtos = customerController.listCustomers(null);
         assertThat(dtos.size()).isEqualTo(count);
     }
 
@@ -57,7 +57,7 @@ class CustomerControllerIT {
     @Rollback
     void testEmptyList() {
         customerRepository.deleteAll();
-        List<CustomerDetailsDTO> dtos = customerController.listCustomers();
+        List<CustomerDetailsDTO> dtos = customerController.listCustomers(null);
         assertThat(dtos.size()).isEqualTo(0);
     }
 

@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface CustomerService {
-    List<CustomerDetailsDTO> listCustomers();
+    List<CustomerDetailsDTO> listCustomers(String name);
 
     Optional<CustomerDetailsDTO> getCustomerDetailsById(UUID id);
 

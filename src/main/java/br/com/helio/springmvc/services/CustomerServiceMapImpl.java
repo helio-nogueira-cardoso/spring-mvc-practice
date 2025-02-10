@@ -49,7 +49,7 @@ public class CustomerServiceMapImpl implements CustomerService {
     }
 
     @Override
-    public List<CustomerDetailsDTO> listCustomers() {
+    public List<CustomerDetailsDTO> listCustomers(String name) {
         return customerMap.values().stream().map(CustomerDetailsDTO::new).toList();
     }
 

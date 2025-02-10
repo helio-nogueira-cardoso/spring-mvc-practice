@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -25,12 +26,16 @@ public class CustomerServiceJPAImpl implements CustomerService {
     private final CustomerMapper customerMapper;
 
     @Override
-    public List<CustomerDetailsDTO> listCustomers() {
-        return customerRepository
-                .findAll()
-                .stream()
-                .map(customerMapper::customerToCustomerDetailsDto)
-                .toList();
+    public List<CustomerDetailsDTO> listCustomers(String name) {
+        List<Customer> customers;
+
+        if (StringUtils.hasText(name)) {
+            customers = customerRepository.findAllByNameIsLikeIgnoreCase(name);
+        } else {
+            customers = customerRepository.findAll();
+        }
+
+        return customers.stream().map(customerMapper::customerToCustomerDetailsDto).toList();
     }
 
     @Override

@@ -107,7 +107,7 @@ class CustomerControllerTest {
 
     @Test
     void listCustomers() throws Exception {
-        when(customerService.listCustomers())
+        when(customerService.listCustomers(null))
                 .thenReturn(customersList);
 
         mockMvc
