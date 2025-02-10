@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -48,14 +49,14 @@ class CustomerControllerIT {
     @Test
     void testListCustomers() {
         long count = customerRepository.count();
-        List<CustomerDetailsDTO> dtos = customerController.listCustomers(null);
-        assertThat(dtos.size()).isEqualTo(count);
+        Page<CustomerDetailsDTO> dtos = customerController.listCustomers(null, 1, 25);
+        assertThat(dtos.getContent().size()).isEqualTo(count);
     }
 
     @Test
     void testListCustomersByName() {
-        List<CustomerDetailsDTO> dtos = customerController.listCustomers("%lorem%");
-        assertThat(dtos.size()).isEqualTo(2);
+        Page<CustomerDetailsDTO> dtos = customerController.listCustomers("%lorem%", 1, 25);
+        assertThat(dtos.getContent().size()).isEqualTo(2);
     }
 
     @Test
@@ -63,8 +64,8 @@ class CustomerControllerIT {
     @Rollback
     void testEmptyList() {
         customerRepository.deleteAll();
-        List<CustomerDetailsDTO> dtos = customerController.listCustomers(null);
-        assertThat(dtos.size()).isEqualTo(0);
+        Page<CustomerDetailsDTO> dtos = customerController.listCustomers(null, 1, 25);
+        assertThat(dtos.getContent().size()).isEqualTo(0);
     }
 
     @Test
@@ -84,7 +85,7 @@ class CustomerControllerIT {
     }
 
     @Test
-    void testBeerIdNotFound() {
+    void testCustomerIdNotFound() {
         assertThrows(NotFoundException.class, () -> customerController.getCustomerById(getNotPresentUUID()));
     }
 

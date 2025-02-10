@@ -8,13 +8,13 @@ import br.com.helio.springmvc.services.CustomerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -81,8 +81,12 @@ public class CustomerController {
     }
 
     @GetMapping(CUSTOMER_PATH)
-    public List<CustomerDetailsDTO> listCustomers(@RequestParam(required = false) String name) {
-        return customerService.listCustomers(name);
+    public Page<CustomerDetailsDTO> listCustomers(
+            @RequestParam(required = false) String name,
+            @RequestParam(name = "page", required = false) Integer pageNumber,
+            @RequestParam(name = "size", required = false) Integer pageSize
+    ) {
+        return customerService.listCustomers(name, pageNumber, pageSize);
     }
 
     @GetMapping(CUSTOMER_PATH_ID)

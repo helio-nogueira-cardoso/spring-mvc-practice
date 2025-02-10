@@ -10,6 +10,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -25,17 +28,43 @@ public class CustomerServiceJPAImpl implements CustomerService {
     private final CustomerRepository customerRepository;
     private final CustomerMapper customerMapper;
 
+    public static final int DEFAULT_PAGE_SIZE = 25;
+    public static final int DEFAULT_PAGE_NUMBER = 0;
+
     @Override
-    public List<CustomerDetailsDTO> listCustomers(String name) {
-        List<Customer> customers;
+    public Page<CustomerDetailsDTO> listCustomers(String name, Integer pageNumber, Integer pageSize) {
+        Page<Customer> customers;
+        Pageable pageable = buildPageRequest(pageNumber, pageSize);
 
         if (StringUtils.hasText(name)) {
-            customers = customerRepository.findAllByNameIsLikeIgnoreCase(name);
+            customers = customerRepository.findAllByNameIsLikeIgnoreCase(
+                    name,
+                    buildPageRequest(pageNumber, pageSize)
+            );
         } else {
-            customers = customerRepository.findAll();
+            customers = customerRepository.findAll(pageable);
         }
 
-        return customers.stream().map(customerMapper::customerToCustomerDetailsDto).toList();
+        return customers.map(customerMapper::customerToCustomerDetailsDto);
+    }
+
+    public PageRequest buildPageRequest(Integer pageNumber, Integer pageSize) {
+        int queryPageNumber = DEFAULT_PAGE_NUMBER;
+        int queryPageSize = DEFAULT_PAGE_SIZE;
+
+        if (pageNumber != null && pageNumber >= 1) {
+            queryPageNumber = pageNumber - 1;
+        }
+
+        if (pageSize != null && pageSize > 0) {
+            if (pageSize > 1000) {
+                queryPageSize = 1000;
+            } else {
+                queryPageSize = pageSize;
+            }
+        }
+
+        return PageRequest.of(queryPageNumber, queryPageSize);
     }
 
     @Override

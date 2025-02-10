@@ -3,13 +3,13 @@ package br.com.helio.springmvc.services;
 import br.com.helio.springmvc.dto.customer.CustomerCreationRequestDTO;
 import br.com.helio.springmvc.dto.customer.CustomerDetailsDTO;
 import br.com.helio.springmvc.dto.customer.CustomerUpdateRequestDTO;
+import org.springframework.data.domain.Page;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 public interface CustomerService {
-    List<CustomerDetailsDTO> listCustomers(String name);
+    Page<CustomerDetailsDTO> listCustomers(String name, Integer pageNumber, Integer pageSize);
 
     Optional<CustomerDetailsDTO> getCustomerDetailsById(UUID id);
 

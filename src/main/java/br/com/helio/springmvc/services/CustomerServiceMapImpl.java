@@ -4,6 +4,8 @@ import br.com.helio.springmvc.dto.customer.CustomerCreationRequestDTO;
 import br.com.helio.springmvc.dto.customer.CustomerDetailsDTO;
 import br.com.helio.springmvc.dto.customer.CustomerUpdateRequestDTO;
 import br.com.helio.springmvc.models.Customer;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -49,8 +51,10 @@ public class CustomerServiceMapImpl implements CustomerService {
     }
 
     @Override
-    public List<CustomerDetailsDTO> listCustomers(String name) {
-        return customerMap.values().stream().map(CustomerDetailsDTO::new).toList();
+    public Page<CustomerDetailsDTO> listCustomers(String name, Integer pageNumber, Integer pageSize) {
+        return new PageImpl<>(
+            customerMap.values().stream().map(CustomerDetailsDTO::new).toList()
+        );
     }
 
     @Override

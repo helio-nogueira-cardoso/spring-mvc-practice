@@ -11,6 +11,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -107,8 +108,8 @@ class CustomerControllerTest {
 
     @Test
     void listCustomers() throws Exception {
-        when(customerService.listCustomers(null))
-                .thenReturn(customersList);
+        when(customerService.listCustomers(any(), any(), any()))
+                .thenReturn(new PageImpl<>(customersList));
 
         mockMvc
             .perform(
@@ -117,7 +118,7 @@ class CustomerControllerTest {
             )
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.length()", is(customersList.size())));
+            .andExpect(jsonPath("$.content.length()", is(customersList.size())));
     }
 
     @Test
