@@ -10,5 +10,6 @@ create table beer_order_line (
     version bigint,
     beer_order_id varchar(36),
 
-    constraint fk_beer foreign key (beer_id) references beer(id)
+    constraint fk_beer foreign key (beer_id) references beer(id),
+    constraint fk_beer_order foreign key (beer_order_id) references beer_order(id)
 ) engine = InnoDB;
