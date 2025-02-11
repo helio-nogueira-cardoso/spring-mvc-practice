@@ -32,10 +32,6 @@ public class BeerOrder {
     @Version
     private Integer version;
 
-    @Column(name = "customer_id", length = 36, columnDefinition = "varchar(36)")
-    @JdbcTypeCode(SqlTypes.CHAR)
-    private UUID customerId;
-
     @CreationTimestamp
     @Column(name = "created_date")
     private LocalDateTime createdDate;
@@ -43,4 +39,8 @@ public class BeerOrder {
     @UpdateTimestamp
     @Column(name = "last_modified_date")
     private LocalDateTime lastModifiedDate;
+
+    // Relationships:
+    @ManyToOne
+    private Customer customer;
 }
