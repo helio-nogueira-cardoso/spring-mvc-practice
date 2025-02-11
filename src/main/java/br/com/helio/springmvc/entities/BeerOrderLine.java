@@ -15,9 +15,28 @@ import java.util.UUID;
 @Entity
 @Table(name = "beer_order_line")
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
 public class BeerOrderLine {
+    public BeerOrderLine(
+            UUID id,
+            Integer orderQuantity,
+            Integer quantityAllocated,
+            Integer version,
+            LocalDateTime createdDate,
+            LocalDateTime lastModifiedDate,
+            Beer beer,
+            BeerOrder beerOrder
+    ) {
+        this.id = id;
+        this.orderQuantity = orderQuantity;
+        this.quantityAllocated = quantityAllocated;
+        this.version = version;
+        this.createdDate = createdDate;
+        this.lastModifiedDate = lastModifiedDate;
+        this.beer = beer;
+        this.setBeerOrder(beerOrder);
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(length = 36, columnDefinition = "varchar(36)", nullable = false, updatable = false)
@@ -47,4 +66,8 @@ public class BeerOrderLine {
 
     @ManyToOne
     private BeerOrder beerOrder;
+    public void setBeerOrder(BeerOrder beerOrder) {
+        this.beerOrder = beerOrder;
+        beerOrder.getBeerOrderLines().add(this);
+    }
 }

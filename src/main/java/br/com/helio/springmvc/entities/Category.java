@@ -1,7 +1,6 @@
 package br.com.helio.springmvc.entities;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -15,21 +14,19 @@ import java.util.UUID;
 
 @Getter
 @Setter
-@Entity
-@Table(name = "beer_order")
 @Builder
-@AllArgsConstructor
+@Entity
+@Table(name = "category")
 @NoArgsConstructor
-public class BeerOrder {
+@AllArgsConstructor
+public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(length = 36, columnDefinition = "varchar(36)", updatable = false, nullable = false)
     @JdbcTypeCode(SqlTypes.CHAR)
+    @Column(length = 36, columnDefinition = "varchar(36)", nullable = false, updatable = false)
     private UUID id;
 
-    @Column(name = "customer_ref")
-    @Size(max = 255)
-    private String customerRef;
+    private String description;
 
     @Version
     private Integer version;
@@ -42,11 +39,13 @@ public class BeerOrder {
     @Column(name = "last_modified_date")
     private LocalDateTime lastModifiedDate;
 
-    // Relationships:
-    @ManyToOne
-    private Customer customer;
-
-    @OneToMany(mappedBy = "beerOrder")
+    // Relationships
+    @ManyToMany
+    @JoinTable(
+            name = "beer_category",
+            joinColumns = @JoinColumn(name = "category_id"),
+            inverseJoinColumns = @JoinColumn(name = "beer_id")
+    )
     @Builder.Default
-    private Set<BeerOrderLine> beerOrderLines = new HashSet<>();
+    private Set<Beer> beers = new HashSet<>();
 }
