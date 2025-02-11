@@ -2,6 +2,7 @@ package br.com.helio.springmvc.repositories;
 
 import br.com.helio.springmvc.bootstrap.BootstrapData;
 import br.com.helio.springmvc.entities.Customer;
+import br.com.helio.springmvc.services.BeerCSVService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolationException;
 import net.bytebuddy.utility.RandomString;
@@ -11,6 +12,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.io.FileNotFoundException;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,15 +24,21 @@ class CustomerRepositoryTest {
     @Autowired
     CustomerRepository customerRepository;
 
+    @Autowired
+    BeerRepository beerRepository;
+
+    @Autowired
+    BeerCSVService beerCSVService;
+
     BootstrapData bootstrapData;
 
     @BeforeEach
     void setUp() {
-        bootstrapData = new BootstrapData(customerRepository);
+        bootstrapData = new BootstrapData(customerRepository, beerRepository, beerCSVService);
     }
 
     @Test
-    void testBootstrappedData() {
+    void testBootstrappedData() throws FileNotFoundException {
         long count = customerRepository.count();
         bootstrapData.run();
         assertThat(customerRepository.count()).isEqualTo(count + 5);
