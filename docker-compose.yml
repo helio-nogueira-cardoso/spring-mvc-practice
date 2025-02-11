@@ -7,11 +7,12 @@ services:
       - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: springmvc
-      MYSQL_USER: helio
-      MYSQL_PASSWORD: helio
+      MYSQL_DATABASE: restdb
+      MYSQL_USER: restadmin
+      MYSQL_PASSWORD: password
     volumes:
       - db_data:/var/lib/mysql
+      - ./src/scripts/mysql-init.sql:/docker-entrypoint-initdb.d/mysql-init.sql:ro
     networks:
       - app_network
 
