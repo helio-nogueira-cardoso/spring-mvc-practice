@@ -24,10 +24,6 @@ public class BeerOrderLine {
     @JdbcTypeCode(SqlTypes.CHAR)
     private UUID id;
 
-    @Column(name = "beer_id", length = 36, columnDefinition = "varchar(36)")
-    @JdbcTypeCode(SqlTypes.CHAR)
-    private UUID beerId;
-
     @Column(name = "order_quantity")
     private Integer orderQuantity;
 
@@ -44,4 +40,11 @@ public class BeerOrderLine {
     @UpdateTimestamp
     @Column(name = "last_modified_date")
     private LocalDateTime lastModifiedDate;
+
+    // Relationships:
+    @ManyToOne
+    private Beer beer;
+
+    @ManyToOne
+    private BeerOrder beerOrder;
 }
