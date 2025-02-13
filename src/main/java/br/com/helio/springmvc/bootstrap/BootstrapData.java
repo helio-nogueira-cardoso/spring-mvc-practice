@@ -45,7 +45,7 @@ public class BootstrapData implements CommandLineRunner {
     public void run(String... args) throws FileNotFoundException {
         addNewCustomer(Customer.builder().name("Customer 1").email("customer1@mail.com"));
         addNewCustomer(Customer.builder().name("Customer 2").email("customer2@mail.com"));
-        addNewCustomer(Customer.builder().name("Customer 3 lorem").email("customer3@mail.com"));
+        addNewCustomer(Customer.builder().name("Customer 3 lorem castor").email("customer3@mail.com"));
         addNewCustomer(Customer.builder().name("Customer 4").email("customer4@mail.com"));
         addNewCustomer(Customer.builder().name("Customer 5 lorem ipsum").email("customer5@mail.com"));
 

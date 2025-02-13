@@ -130,6 +130,8 @@ class CustomerControllerIT {
     }
 
     @Test
+    @Transactional
+    @Rollback
     void updateExistingCustomer() {
         final String UPDATED_NAME = "UPDATED";
         CustomerUpdateRequestDTO updateRequestDto = CustomerUpdateRequestDTO.builder().name(UPDATED_NAME).build();

@@ -3,12 +3,14 @@ package br.com.helio.springmvc.repositories;
 import br.com.helio.springmvc.bootstrap.BootstrapData;
 import br.com.helio.springmvc.entities.Customer;
 import br.com.helio.springmvc.services.BeerCSVService;
+import br.com.helio.springmvc.services.BeerCSVServiceImpl;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolationException;
 import net.bytebuddy.utility.RandomString;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -20,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DataJpaTest
 @ActiveProfiles("localmysql")
+@Import(BeerCSVServiceImpl.class)
 class CustomerRepositoryTest {
     @Autowired
     CustomerRepository customerRepository;
