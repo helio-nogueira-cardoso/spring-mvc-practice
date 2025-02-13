@@ -113,6 +113,21 @@ class CustomerControllerTest {
     }
 
     @Test
+    void failingAuthenticationGetCustomerById() throws Exception {
+        CustomerDetailsDTO testCustomerDetailsDTO = customersList.getFirst();
+
+        when(customerService.getCustomerDetailsById(testCustomerDetailsDTO.id()))
+                .thenReturn(Optional.of(testCustomerDetailsDTO));
+
+        mockMvc
+                .perform(
+                        get(CustomerController.CUSTOMER_PATH_ID, testCustomerDetailsDTO.id())
+                                .accept(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void getCustomerByIdNotFound() throws Exception {
         when(customerService.getCustomerDetailsById(any(UUID.class)))
                 .thenReturn(Optional.empty());
