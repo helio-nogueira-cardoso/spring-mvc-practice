@@ -1,5 +1,6 @@
 package br.com.helio.springmvc.controllers;
 
+import br.com.helio.springmvc.config.SpringSecurityConfiguration;
 import br.com.helio.springmvc.dto.customer.CustomerCreationRequestDTO;
 import br.com.helio.springmvc.dto.customer.CustomerDetailsDTO;
 import br.com.helio.springmvc.dto.customer.CustomerUpdateRequestDTO;
@@ -10,8 +11,11 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -28,13 +32,21 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.hamcrest.core.Is.is;
 
 @WebMvcTest(CustomerController.class)
+@Import(SpringSecurityConfiguration.class)
 @ActiveProfiles("localmysql")
 class CustomerControllerTest {
+    @Value("${spring.security.user.name}")
+    String username;
+
+    @Value("${spring.security.user.password}")
+    String password;
+
     @Autowired
     MockMvc mockMvc;
 
@@ -46,6 +58,12 @@ class CustomerControllerTest {
 
     @Captor
     ArgumentCaptor<CustomerUpdateRequestDTO> customerUpdateRequestArgumentCaptor;
+
+    private HttpHeaders getAuthHeader() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBasicAuth(username, password);
+        return headers;
+    }
 
     private final List<CustomerDetailsDTO> customersList = new ArrayList<>(List.of(
         new CustomerDetailsDTO(
@@ -85,6 +103,7 @@ class CustomerControllerTest {
             .perform(
                 get(CustomerController.CUSTOMER_PATH_ID, testCustomerDetailsDTO.id())
                     .accept(MediaType.APPLICATION_JSON)
+                    .headers(getAuthHeader())
             )
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -102,6 +121,7 @@ class CustomerControllerTest {
             .perform(
                 get(CustomerController.CUSTOMER_PATH_ID, UUID.randomUUID())
                     .accept(MediaType.APPLICATION_JSON)
+                    .headers(getAuthHeader())
             )
             .andExpect(status().isNotFound());
     }
@@ -115,6 +135,7 @@ class CustomerControllerTest {
             .perform(
                 get(CustomerController.CUSTOMER_PATH)
                     .accept(MediaType.APPLICATION_JSON)
+                    .headers(getAuthHeader())
             )
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -134,6 +155,7 @@ class CustomerControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
+                .headers(getAuthHeader())
         )
             .andExpect(status().isCreated())
             .andExpect(header().exists("Location"))
@@ -172,6 +194,7 @@ class CustomerControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(customerUpdateRequestDTO))
+                .headers(getAuthHeader())
         )
             .andExpect(status().isNoContent())
             .andExpect(header().doesNotExist("Location"));
@@ -211,6 +234,7 @@ class CustomerControllerTest {
                                 .accept(MediaType.APPLICATION_JSON)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(customerUpdateRequestDTO))
+                                .with(httpBasic(username, password))
                 )
                 .andExpect(status().isCreated())
                 .andExpect(header().exists("Location"))
@@ -241,6 +265,7 @@ class CustomerControllerTest {
         mockMvc.perform(
             delete(CustomerController.CUSTOMER_PATH_ID, ID_TO_BE_DELETED)
                 .accept(MediaType.APPLICATION_JSON)
+                .headers(getAuthHeader())
         )
             .andExpect(status().isNoContent());
 
@@ -257,6 +282,7 @@ class CustomerControllerTest {
         mockMvc.perform(
                         delete(CustomerController.CUSTOMER_PATH_ID, ABSENT_ID)
                                 .accept(MediaType.APPLICATION_JSON)
+                                .headers(getAuthHeader())
                 )
                 .andExpect(status().isNotFound());
 
@@ -275,6 +301,7 @@ class CustomerControllerTest {
                                 .accept(MediaType.APPLICATION_JSON)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(emptyRequest))
+                                .headers(getAuthHeader())
                 )
                 .andExpect(status().isBadRequest()).andReturn();
 
