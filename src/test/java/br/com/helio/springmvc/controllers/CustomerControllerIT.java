@@ -11,6 +11,7 @@ import jakarta.transaction.Transactional;
 import net.bytebuddy.utility.RandomString;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
@@ -27,6 +28,7 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -34,6 +36,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("localmysql")
 class CustomerControllerIT {
+    @Value("${spring.security.user.name}")
+    private String username;
+
+    @Value("${spring.security.user.password}")
+    private String password;
+
     @Autowired
     CustomerController customerController;
 
@@ -199,7 +207,7 @@ class CustomerControllerIT {
                                         objectMapper.writeValueAsString(CustomerCreationRequestDTO.builder()
                                                 .name(RandomString.make(51))
                                                 .build())
-                                )
+                                ).with(httpBasic(username, password))
                 )
                 .andExpect(status().isBadRequest())
                 .andReturn();
