@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -29,10 +28,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static br.com.helio.springmvc.testUtils.RequestPostProcessors.mockJwt;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.hamcrest.core.Is.is;
@@ -41,11 +40,8 @@ import static org.hamcrest.core.Is.is;
 @Import(SpringSecurityConfiguration.class)
 @ActiveProfiles("localmysql")
 class CustomerControllerTest {
-    @Value("${spring.security.user.name}")
-    String username;
-
-    @Value("${spring.security.user.password}")
-    String password;
+    @Value("${spring.api.security.oauth2.client-id}")
+    private String subject;
 
     @Autowired
     MockMvc mockMvc;
@@ -58,12 +54,6 @@ class CustomerControllerTest {
 
     @Captor
     ArgumentCaptor<CustomerUpdateRequestDTO> customerUpdateRequestArgumentCaptor;
-
-    private HttpHeaders getAuthHeader() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBasicAuth(username, password);
-        return headers;
-    }
 
     private final List<CustomerDetailsDTO> customersList = new ArrayList<>(List.of(
         new CustomerDetailsDTO(
@@ -103,7 +93,7 @@ class CustomerControllerTest {
             .perform(
                 get(CustomerController.CUSTOMER_PATH_ID, testCustomerDetailsDTO.id())
                     .accept(MediaType.APPLICATION_JSON)
-                    .headers(getAuthHeader())
+                        .with(mockJwt(subject, List.of("message.read", "message.write")))
             )
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -136,7 +126,7 @@ class CustomerControllerTest {
             .perform(
                 get(CustomerController.CUSTOMER_PATH_ID, UUID.randomUUID())
                     .accept(MediaType.APPLICATION_JSON)
-                    .headers(getAuthHeader())
+                    .with(mockJwt(subject, List.of("message.read", "message.write")))
             )
             .andExpect(status().isNotFound());
     }
@@ -150,7 +140,7 @@ class CustomerControllerTest {
             .perform(
                 get(CustomerController.CUSTOMER_PATH)
                     .accept(MediaType.APPLICATION_JSON)
-                    .headers(getAuthHeader())
+                    .with(mockJwt(subject, List.of("message.read", "message.write")))
             )
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -170,7 +160,7 @@ class CustomerControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
-                .headers(getAuthHeader())
+                .with(mockJwt(subject, List.of("message.read", "message.write")))
         )
             .andExpect(status().isCreated())
             .andExpect(header().exists("Location"))
@@ -209,7 +199,7 @@ class CustomerControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(customerUpdateRequestDTO))
-                .headers(getAuthHeader())
+                .with(mockJwt(subject, List.of("message.read", "message.write")))
         )
             .andExpect(status().isNoContent())
             .andExpect(header().doesNotExist("Location"));
@@ -249,7 +239,7 @@ class CustomerControllerTest {
                                 .accept(MediaType.APPLICATION_JSON)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(customerUpdateRequestDTO))
-                                .with(httpBasic(username, password))
+                                .with(mockJwt(subject, List.of("message.read", "message.write")))
                 )
                 .andExpect(status().isCreated())
                 .andExpect(header().exists("Location"))
@@ -280,7 +270,7 @@ class CustomerControllerTest {
         mockMvc.perform(
             delete(CustomerController.CUSTOMER_PATH_ID, ID_TO_BE_DELETED)
                 .accept(MediaType.APPLICATION_JSON)
-                .headers(getAuthHeader())
+                .with(mockJwt(subject, List.of("message.read", "message.write")))
         )
             .andExpect(status().isNoContent());
 
@@ -297,7 +287,7 @@ class CustomerControllerTest {
         mockMvc.perform(
                         delete(CustomerController.CUSTOMER_PATH_ID, ABSENT_ID)
                                 .accept(MediaType.APPLICATION_JSON)
-                                .headers(getAuthHeader())
+                                .with(mockJwt(subject, List.of("message.read", "message.write")))
                 )
                 .andExpect(status().isNotFound());
 
@@ -316,7 +306,7 @@ class CustomerControllerTest {
                                 .accept(MediaType.APPLICATION_JSON)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(emptyRequest))
-                                .headers(getAuthHeader())
+                                .with(mockJwt(subject, List.of("message.read", "message.write")))
                 )
                 .andExpect(status().isBadRequest()).andReturn();
 

@@ -11,9 +11,14 @@ public class SpringSecurityConfiguration {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
-                .authorizeHttpRequests(amrmr -> amrmr.anyRequest().authenticated())
-                .httpBasic(Customizer.withDefaults())
-                .csrf(csrfConfigurer -> csrfConfigurer.ignoringRequestMatchers("/api/**"));
+                .authorizeHttpRequests(
+                        authorizationManagerRequestMatcherRegistry ->
+                                authorizationManagerRequestMatcherRegistry.anyRequest().authenticated()
+                )
+                .oauth2ResourceServer(
+                        oauth2ResourceServerConfigurer ->
+                                oauth2ResourceServerConfigurer.jwt(Customizer.withDefaults())
+                );
         return httpSecurity.build();
     }
 }

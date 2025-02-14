@@ -26,9 +26,9 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.*;
 
+import static br.com.helio.springmvc.testUtils.RequestPostProcessors.mockJwt;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -36,11 +36,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("localmysql")
 class CustomerControllerIT {
-    @Value("${spring.security.user.name}")
-    private String username;
-
-    @Value("${spring.security.user.password}")
-    private String password;
+    @Value("${spring.api.security.oauth2.client-id}")
+    private String subject;
 
     @Autowired
     CustomerController customerController;
@@ -193,7 +190,7 @@ class CustomerControllerIT {
 
     @Test
     /*
-      Do not use @Transactional when you want to simulate an error comming
+      Do not use @Transactional when you want to simulate an error coming
       from the database itself. Because the operations will be cached, and
       then not validated by the database.
      */
@@ -207,7 +204,7 @@ class CustomerControllerIT {
                                         objectMapper.writeValueAsString(CustomerCreationRequestDTO.builder()
                                                 .name(RandomString.make(51))
                                                 .build())
-                                ).with(httpBasic(username, password))
+                                ).with(mockJwt(subject, List.of("message.read", "message.write")))
                 )
                 .andExpect(status().isBadRequest())
                 .andReturn();
